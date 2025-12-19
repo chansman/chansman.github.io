@@ -64,3 +64,12 @@ img {
 .section {
     margin-bottom: 35px;
 }
+
+.paperTitle {
+    display: block;
+    margin-bottom: 0.1em;
+}
+
+.section li {
+    margin-bottom: 1.2em;
+}
