@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monocentric City Workbench</title>
+<meta name="description" content="An interactive walkthrough of the monocentric city model — ECON 446, Emory University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500&family=Roboto+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400;0,500;1,400;1,500&display=swap">
+<style>
+/* The artifact host supplies these when published there; needed when self-hosted. */
+:root{color-scheme:light dark}
+html,body{margin:0;padding:0}
+img{max-width:100%}
+</style>
+<style>
+:root{
+  --ground:#fff; --panel:#fff; --panel-2:#f4f7f8;
+  --line:#d8e1e3; --line-soft:#e9eff0; --grid:#eaf0f1;
+  --ink:#131516; --ink-2:#394345; --muted:#4d5759;
+  --accent:#107895; --accent2:#9a2515; --kelly:#6f7f46;
+  --house:#9a2515; --roof:#75190d; --spend-soft:#c4705f;
+  --on-fill:#fff;
+  --fs-xs:15px; --fs-s:16.5px; --fs-m:19px; --fs-l:23px; --fs-xl:31px;
+  --fs-eq:clamp(34px,4.1vw,58px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#11161a; --panel:#161c20; --panel-2:#1b2226;
+  --line:#2c363a; --line-soft:#222b2f; --grid:#1e2528;
+  --ink:#eaeff1; --ink-2:#c8d2d5; --muted:#9aa8ac;
+  --accent:#57b8d0; --accent2:#e88068; --kelly:#b3c489;
+  --house:#e88068; --roof:#c25f47; --spend-soft:#b3604c;
+  --on-fill:#10171a;
+}}
+:root[data-theme="dark"]{
+  --ground:#11161a; --panel:#161c20; --panel-2:#1b2226;
+  --line:#2c363a; --line-soft:#222b2f; --grid:#1e2528;
+  --ink:#eaeff1; --ink-2:#c8d2d5; --muted:#9aa8ac;
+  --accent:#57b8d0; --accent2:#e88068; --kelly:#b3c489;
+  --house:#e88068; --roof:#c25f47; --spend-soft:#b3604c;
+  --on-fill:#10171a;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--ground); color:var(--ink);
+  font:300 var(--fs-m)/1.5 Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1500px;margin:0 auto;padding:24px 34px 34px;display:flex;flex-direction:column;gap:24px}
+.v{font-family:"STIX Two Text",Newsreader,Georgia,serif;font-style:italic}
+.mono{font-family:"Roboto Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+svg{display:block;width:100%;height:auto}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px 34px}
+h1{margin:0;font-size:var(--fs-xl);font-weight:400;letter-spacing:-.018em;line-height:1.08}
+.rail{display:flex;gap:5px;flex-wrap:wrap}
+.rail button{
+  font:400 var(--fs-xs)/1 Roboto,sans-serif;padding:11px 17px;cursor:pointer;border-radius:2px;
+  background:transparent;color:var(--muted);border:1px solid transparent;transition:color .13s,background .13s;
+}
+.rail button:hover{color:var(--ink)}
+.rail button[aria-pressed="true"]{background:var(--accent);color:var(--on-fill);border-color:var(--accent)}
+.rail button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.narr{border-left:3px solid var(--accent2);padding:2px 0 2px 20px;max-width:80ch}
+.narr h2{margin:0 0 5px;font-size:var(--fs-l);font-weight:400;letter-spacing:-.012em;line-height:1.25;text-wrap:balance}
+.narr p{margin:0;font-size:var(--fs-s);color:var(--muted)}
+
+.block{display:flex;flex-direction:column;gap:12px}
+.label{font-size:var(--fs-xs);letter-spacing:.06em;color:var(--muted)}
+
+/* budget bar */
+.bar{display:flex;height:66px;border-radius:2px;overflow:hidden;background:var(--panel-2)}
+.bar .seg{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 15px;
+  overflow:hidden;white-space:nowrap;color:var(--on-fill);transition:width .18s ease}
+.bar .seg .k{font-size:var(--fs-xs);opacity:.9}
+.bar .seg .n{font-size:var(--fs-s);font-weight:500}
+.seg.commute{background:var(--muted)} .seg.rentpaid{background:var(--accent2)}
+.seg.left{background:var(--accent2)} .seg.cons{background:var(--spend-soft)}
+.seg.tight{padding:0}.seg.tight .k,.seg.tight .n{display:none}
+.barfoot{display:flex;justify-content:space-between;gap:20px;font-size:var(--fs-xs);color:var(--muted)}
+
+.cols{display:grid;gap:34px;align-items:start;position:relative}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)!important}}
+.stack{display:flex;flex-direction:column;gap:22px}
+
+.ctl{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:var(--fs-xs)}
+.ctl label{color:var(--muted);white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;flex:1;min-width:150px;height:24px;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line)}
+input[type=range]::-moz-range-track{height:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;background:var(--accent2);margin-top:-7px;border:2px solid var(--panel)}
+input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--accent2);border:2px solid var(--panel)}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+button.act{font:400 var(--fs-xs) Roboto,sans-serif;padding:10px 18px;cursor:pointer;border-radius:2px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2)}
+button.act:hover{border-color:var(--accent2);color:var(--accent2)}
+button.act:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.made-up{font-size:var(--fs-xs);color:var(--accent2)}
+
+.seg2{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.seg2 button{font:400 var(--fs-xs) Roboto,sans-serif;padding:7px 14px;cursor:pointer;background:var(--panel);color:var(--muted);border:0;border-right:1px solid var(--line)}
+.seg2 button:last-child{border-right:0}
+.seg2 button[aria-pressed="true"]{background:var(--accent);color:var(--on-fill)}
+
+.ros{display:flex;gap:44px;flex-wrap:wrap}
+.ro .k{display:block;font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px}
+.ro .n{font:500 var(--fs-l) "Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+.ro.a .n{color:var(--accent)} .ro.b .n{color:var(--accent2)}
+
+details.params{border-top:1px solid var(--line-soft)}
+details.params>summary{cursor:pointer;font-size:var(--fs-xs);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);list-style:none;padding:14px 0;display:flex;align-items:center;gap:10px}
+details.params>summary::-webkit-details-marker{display:none}
+details.params>summary::before{content:"";width:6px;height:6px;border-right:2px solid var(--muted);
+  border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+details.params[open]>summary::before{transform:rotate(45deg)}
+details.params>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px 34px;padding:4px 0 18px}
+.p .plab{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.p .pn{font-size:var(--fs-xs);color:var(--ink-2)}
+.p .pv{font:400 var(--fs-xs) "Roboto Mono",monospace;color:var(--accent);font-variant-numeric:tabular-nums}
+.bigeq{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;
+  gap:0 .30em;font-size:var(--fs-eq);line-height:1;padding:6px 0 2px}
+.bigeq .tok{display:flex;flex-direction:column;align-items:center;gap:.20em}
+.bigeq .sym{font-family:"STIX Two Text",Newsreader,Georgia,serif;font-style:italic;font-weight:400}
+.bigeq .op{font-family:"STIX Two Text",Newsreader,Georgia,serif;color:var(--ink-2)}
+.bigeq .val{font-family:"Roboto Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;
+  font-size:.36em;font-weight:500;min-height:1.1em;letter-spacing:-.01em}
+.bigeq .commute{color:var(--muted)} .bigeq .spend{color:var(--accent2)}
+.bigeq .live .val{color:var(--accent2)}
+#bLot.wide svg{max-height:34vh;margin:0 auto}
+/* the assumption, and the restriction it puts on the model */
+.assume{flex-direction:row;align-items:center;flex-wrap:wrap;gap:10px 15px;
+  font-size:var(--fs-s);color:var(--ink-2)}
+.assume .tag{font:400 var(--fs-xs)/1 Roboto,sans-serif;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--on-fill);background:var(--accent);padding:7px 11px;border-radius:2px;white-space:nowrap}
+.assume .arrow{color:var(--accent2);font-size:1.3em;line-height:1}
+.assume .plus{color:var(--muted);font-size:1.2em;line-height:1}
+.assume .solve{color:var(--accent2);font-weight:500}
+.bigeq .house{color:var(--house)} .bigeq .cons{color:var(--spend-soft)}
+.bigeq sup{font-size:.52em;line-height:0}
+.bigeq .val sup{font-size:.72em}
+.zoomer{position:absolute;inset:0;z-index:4;background:var(--ground);
+  display:flex;align-items:center;overflow:hidden;pointer-events:none}
+.zoomer svg{width:100%}
+#utilNote{min-height:1.5em;text-align:center;letter-spacing:0}
+.alg{display:flex;flex-direction:column;align-items:center;gap:20px;padding:10px 0 26px;text-align:center}
+.alg .mx{font-family:"STIX Two Text",Newsreader,Georgia,serif;font-size:var(--fs-l);
+  color:var(--ink);line-height:1.4}
+.alg .mx i{font-style:italic}
+.alg .mx sub{font-size:.62em}
+.alg .ru{color:var(--accent2)} .alg .al{color:var(--accent)}
+.alg .step{font:300 var(--fs-xs)/1.4 Roboto,sans-serif;color:var(--muted);margin:-6px 0 -4px}
+.alg .step i{font-family:"STIX Two Text",Newsreader,serif;font-style:italic}
+/* Sit the fraction on the math axis so the = and - signs line up with the bar,
+   rather than hanging off the baseline of a two-line box. */
+.frac{display:inline-block;vertical-align:middle;text-align:center;
+  font-size:.82em;line-height:1.22;margin:0 .18em}
+.frac>span{display:block;padding:0 .3em}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding-bottom:.08em}
+.frac>span:last-child{padding-top:.08em}
+footer{font-size:var(--fs-xs);color:var(--muted);border-top:1px solid var(--line-soft);padding-top:18px;max-width:84ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Monocentric City</h1>
+    <nav class="rail" id="rail" aria-label="Steps"></nav>
+  </header>
+
+  <div class="narr" id="narr"><h2 id="nTitle"></h2><p id="nBody"></p></div>
+
+  <div class="block assume" id="bAssume">
+    <span class="tag">Assumption</span>
+    <span>Everyone is identical</span>
+    <span class="arrow">&rarr;</span>
+    <span>living anywhere in the city must give the same utility <span class="v">&#363;</span></span>
+    <span class="arrow">&rarr;</span>
+    <span class="solve">rent must adjust</span>
+  </div>
+
+  <div class="block" id="bLine">
+    <svg id="cityLine" viewBox="0 0 1000 150" role="img" aria-label="The city as a line running out from the central business district"></svg>
+  </div>
+
+  <div class="block" id="bBudget">
+    <div class="bigeq" id="budgetEq"></div>
+  </div>
+
+  <div class="block" id="bPacked">
+    <div class="label" id="packedLabel"></div>
+    <svg id="packedSvg" viewBox="0 0 1000 210" role="img" aria-label="The city with every household's house drawn to scale along the land"></svg>
+  </div>
+
+  <div class="block" id="bBar">
+    <div class="label" id="barLabel"></div>
+    <div class="bar" id="bar"></div>
+    <div class="barfoot" id="barFoot"><span id="barFootL"></span><span class="mono" id="barFootR"></span></div>
+  </div>
+
+  <div class="cols" id="bCols">
+    <div class="zoomer" id="zoomer" hidden><div id="zoomInner" style="width:100%">
+      <svg id="zoomSvg" viewBox="0 0 1000 130" role="presentation"></svg>
+    </div></div>
+    <div class="stack" id="colLeft">
+      <div class="block" id="bLot">
+        <div class="label" id="lotLabel">What that buys, here</div>
+        <svg id="lotSvg" viewBox="0 0 640 260" role="img" aria-label="A lot with a house drawn to scale beside a stack of consumption tiles"></svg>
+      </div>
+    </div>
+    <div class="stack" id="colRight">
+      <div class="block" id="bChoice">
+        <div class="ctl">
+          <label for="lSlide">House size <span class="v">ℓ</span></label>
+          <input type="range" id="lSlide" min="0" max="1" step="0.001">
+        </div>
+      </div>
+
+      <div class="block" id="bRent">
+        <div class="ctl" style="justify-content:space-between">
+          <div class="label" id="rentLabel"></div>
+          <div class="seg2" id="viewSeg">
+            <button type="button" data-m="rent" aria-pressed="true">Rent</button>
+            <button type="button" data-m="size" aria-pressed="false">House size</button>
+            <button type="button" data-m="density" aria-pressed="false">Density</button>
+          </div>
+        </div>
+        <svg id="rentSvg" viewBox="0 0 560 230" role="img" aria-label="Rent falling with distance from the central business district"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="block" id="bUtil">
+    <div class="bigeq" id="utilEq"></div>
+    <svg id="utilSvg" viewBox="0 0 1000 220" role="img" aria-label="Utility against house size, along the budget"></svg>
+    <div class="label" id="utilNote"></div>
+    <details class="params" id="bAlg"><summary>The algebra, step by step</summary>
+      <div class="alg" id="algBody"></div>
+    </details>
+  </div>
+
+  <div class="block assume" id="bCloses">
+    <span class="tag">Two conditions</span>
+    <span>Everyone has to fit, and at the boundary land is worth the same as farmland &mdash;
+      <span class="solve">together these set the city&rsquo;s size, <span class="v">x&#772;</span></span></span>
+  </div>
+
+  <details class="params" id="bCityAlg"><summary>The algebra, step by step</summary>
+    <div class="alg" id="cityAlgBody"></div>
+  </details>
+
+  <details class="params" id="bRentAlg"><summary>The algebra, step by step</summary>
+    <div class="alg" id="rentAlgBody"></div>
+  </details>
+
+  <div class="ros" id="ros"></div>
+
+  <details class="params" id="bGradAlg"><summary>How does rent change across the city?</summary>
+    <div class="alg" id="gradAlgBody"></div>
+  </details>
+  <details class="params" id="bParams"><summary>Parameters</summary><div class="pgrid" id="pgrid"></div></details>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const pow=Math.pow, clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const fmt=(v,d)=>isFinite(v)?v.toFixed(d==null?2:d):"—";
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const trim=v=>{const t=(+v).toFixed(2);return t.indexOf(".")<0?t:t.replace(/0+$/,"").replace(/\.$/,"");};
+const cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+
+const DEF={alpha:1/3,y:100,t:1,N:35,rA:5};
+const P=Object.assign({},DEF);
+let x=20, tab=1, plotMode="rent";
+// At step 2 rent is a given rather than a control -- but it is the rent the
+// model actually produces at this location, so the number carries over intact
+// when the rent curve is derived two steps later.
+const rGiven=()=>{const d=D(); return x>d.xbar ? P.rA : rEq(x,d);};
+let lChoice=null;               // the house size the presenter is trying out
+
+function D(){
+  const {alpha,y,t,N,rA}=P;
+  const C=alpha*pow(1-alpha,(1-alpha)/alpha);
+  const K=pow(alpha,alpha)*pow(1-alpha,1-alpha);
+  const r0=t*N+rA;
+  const ubar=pow(alpha*y/r0,alpha)*pow((1-alpha)*y,1-alpha);
+  const xbar=(y-ubar*pow(rA,alpha)/K)/t;
+  return {C,K,r0,ubar,xbar};
+}
+const rEq=(xx,d)=>d.C*pow((P.y-P.t*xx)/d.ubar,1/P.alpha);
+const disp=xx=>P.y-P.t*xx;
+const lOf=(xx,r)=>P.alpha*disp(xx)/r;
+const cOf=xx=>(1-P.alpha)*disp(xx);
+const equil=()=>tab>=3;
+const rAt=(xx,d)=>equil()?rEq(xx,d):rGiven();
+const uOf=(l,c)=>(l>0&&c>0)?pow(l,P.alpha)*pow(c,1-P.alpha):0;
+const maxAfford=xx=>disp(xx)/rGiven();
+// On step 2 the household is mid-search, so the bundle is whatever size is
+// currently being tried; everywhere else it is the model's own solution.
+function bundle(d){
+  if(tab===2){
+    const r=rGiven(), l=clamp(lChoice==null?0.14*maxAfford(x):lChoice,1e-4,maxAfford(x)*0.999);
+    return {r:r, l:l, c:disp(x)-r*l};
+  }
+  const r=rAt(x,d), l=lOf(x,r);
+  return {r:r, l:l, c:cOf(x)};
+}
+const lotScale=d=>(tab===2? maxAfford(x)*1.12 : lOf(d.xbar,P.rA)*1.10);
+// Visible extent of the line. Before spatial equilibrium the city edge does
+// not exist yet, so the view is scaled by y and t — the only two parameters
+// the presenter has introduced — rather than by xbar.
+const viewMax=d=>equil()?d.xbar:0.6*P.y/P.t;
+
+/* Exact house boundaries. The number of households between 0 and X is
+   (r(0) − r(X))/t, so the k-th boundary solves r(X) = r(0) − kt, which
+   inverts in closed form. Gives exactly N houses, with X(N) = xbar. */
+function boundaries(d){
+  const n=Math.round(P.N), out=[];
+  for(let k=0;k<=n;k++){
+    const rk=d.r0-k*P.t;
+    if(!(rk>0)) break;
+    out.push((P.y-d.ubar*pow(rk/d.C,P.alpha))/P.t);
+  }
+  return out;
+}
+
+function el(t,a,txt){let s="<"+t;for(const k in a){if(a[k]!=null)s+=" "+k+'="'+a[k]+'"';}s+=">";if(txt!=null)s+=esc(txt);return s+"</"+t+">";}
+function pth(d,st,w,ex){return el("path",Object.assign({d:d,fill:"none",stroke:st,"stroke-width":w,"stroke-linecap":"round"},ex||{}));}
+function niceMax(v){
+  if(!(v>0)||!isFinite(v)) return 1;
+  const e=Math.pow(10,Math.floor(Math.log10(v))), m=v/e;
+  return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*e;
+}
+
+/* ------------------------------------------------------------- the line */
+function drawLine(d,forceSolo,svgId){
+  const solo=forceSolo||tab===1, H=solo?130:80, base=solo?76:46, L=48, R=952;
+  const vm=viewMax(d), px=xx=>L+(xx/vm)*(R-L);
+  const A=cv("--accent"), A2=cv("--accent2"), MU=cv("--muted"), LN=cv("--line");
+  let s=""; $(svgId||"cityLine").setAttribute("viewBox","0 0 1000 "+H);
+  s+=pth("M "+L+" "+base+" L "+R+" "+base, LN, 3.5);
+  if(solo) s+=pth("M "+L+" "+base+" L "+px(x)+" "+base, MU, 6);   // the commute, drawn in grey
+  s+=el("circle",{cx:L,cy:base,r:solo?10:8,fill:"none",stroke:A,"stroke-width":3});
+  s+=el("text",{x:L,y:base-(solo?24:19),"text-anchor":"middle","font-size":solo?18:15,fill:A},"CBD");
+  if(solo) s+=el("text",{x:R,y:base+30,"text-anchor":"end","font-size":16,fill:MU},"further out →");
+  const cx=px(x);
+  s+=pth("M "+cx+" "+(base-(solo?28:20))+" L "+cx+" "+(base+(solo?28:20)), A2, 2.5);
+  s+=el("circle",{cx:cx,cy:base,r:solo?12:9,fill:A2,stroke:cv("--panel"),"stroke-width":3});
+  s+=el("text",{x:cx,y:base-(solo?40:30),"text-anchor":"middle","font-size":solo?18:15,fill:A2,
+    "font-family":"Roboto Mono,monospace"},fmt(x,1)+" km");
+  return s;
+}
+
+/* --------------------------------------------------------- budget bar */
+function drawBar(d){
+  const commute=P.t*x, B=bundle(d), rentPaid=B.r*B.l, cons=B.c;
+  const pc=100*commute/P.y;
+  const seg=(cls,k,n,pct)=>'<div class="seg '+cls+(pct<9?" tight":"")+'" style="width:'+pct+'%"><span class="k">'+k+'</span><span class="n">'+n+'</span></div>';
+  let h=seg("commute","commute","−"+fmt(commute,1),pc);
+  if(tab===1){
+    h+=seg("left","left to spend",fmt(disp(x),1),100-pc);
+    $("barLabel").textContent="Income, and what the commute takes";
+    $("barFootL").textContent="Commuting costs "+fmt(commute,1)+" — everything else has to come out of what is left";
+  }else{
+    h+=seg("rentpaid","rent  r·ℓ",fmt(rentPaid,1),100*rentPaid/P.y);
+    h+=seg("cons","everything else  c",fmt(cons,1),100*cons/P.y);
+    $("barLabel").textContent="Where the income goes";
+    $("barFootL").textContent = (tab===2)
+      ? "Stretch the house and the rent slice grows — every unit of frontage is paid for out of consumption"
+      : "A share α = "+fmt(P.alpha,2)+" of what survives the commute goes to housing";
+  }
+  $("barFootR").textContent="total "+fmt(P.y,0);
+  $("barLabel").hidden = (tab===1);   // the segments label themselves
+  $("barFoot").hidden  = (tab===1);
+  $("bar").innerHTML=h;
+}
+
+/* ------------------------------------ the lot: house to scale + tiles */
+function drawLot(d){
+  const wide=(tab===2), W=wide?1000:640, H=wide?300:260;
+  $("lotSvg").setAttribute("viewBox","0 0 "+W+" "+H);
+  $("bLot").classList.toggle("wide",wide);
+  const B=bundle(d), l=B.l, c=B.c;
+  const A2=cv("--accent2"), MU=cv("--muted"), HS=cv("--house"), RF=cv("--roof"), LN=cv("--line");
+  // scale is fixed by the parameters alone, never by rent or by equilibrium
+  const lMax=lotScale(d);
+  const landX=wide?24:12, landW=wide?560:330, base=wide?208:180,
+        BH=wide?92:62, RH=wide?38:26, FS=wide?26:18, FS2=wide?18:15;
+  const w=clamp((l/lMax)*landW,7,landW);
+  let s="";
+  s+=pth("M "+landX+" "+base+" L "+(landX+landW)+" "+base, LN, 2.5);
+  s+=el("rect",{x:landX,y:base-BH,width:w,height:BH,fill:HS,opacity:.92});
+  s+=el("path",{d:"M "+(landX-3)+" "+(base-BH)+" L "+(landX+w/2)+" "+(base-BH-RH)+" L "+(landX+w+3)+" "+(base-BH)+" Z",fill:RF});
+  s+=pth("M "+landX+" "+(base+16)+" L "+(landX+w)+" "+(base+16), A2, 2);
+  s+=pth("M "+landX+" "+(base+11)+" L "+landX+" "+(base+21), A2, 2);
+  s+=pth("M "+(landX+w)+" "+(base+11)+" L "+(landX+w)+" "+(base+21), A2, 2);
+  s+=el("text",{x:landX,y:base+(wide?60:46),"font-size":FS,fill:A2,"font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"ℓ = "+fmt(l));
+  s+=el("text",{x:landX,y:base+(wide?90:70),"font-size":FS2,fill:MU},"frontage of land");
+
+  const SF=cv("--spend-soft");
+  // One tile is one unit. The grid is sized for the most tiles this location
+  // could ever need, so nothing resizes while the house is being stretched.
+  const tx0=wide?640:400, ty0=base+4, perCol=wide?10:9;
+  const nMax=Math.max(1,Math.round(disp(x))), ncol=Math.ceil(nMax/perCol);
+  const availW=(W-(wide?24:12))-tx0, availH=base-(wide?14:12);
+  const cell=Math.max(4,Math.min(wide?26:20, availW/ncol, availH/perCol)), tw=cell*0.8;
+  const tiles=Math.max(0,Math.round(c));
+  s+=el("text",{x:tx0,y:base+(wide?60:46),"font-size":FS,fill:SF,"font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"c = "+fmt(c,1));
+  s+=el("text",{x:tx0,y:base+(wide?90:70),"font-size":FS2,fill:MU},"everything else");
+  for(let i=0;i<tiles;i++){
+    const col=Math.floor(i/perCol), row=i%perCol;
+    s+=el("rect",{x:(tx0+col*cell).toFixed(1),y:(ty0-(row+1)*cell).toFixed(1),
+      width:tw.toFixed(1),height:tw.toFixed(1),fill:SF,opacity:.85});
+  }
+  return s;
+}
+
+/* --------------------------------------------------- the packed city */
+function drawPacked(d){
+  const W=1000,H=210,L=42,R=958,base=150;
+  const xMax=d.xbar*1.16, px=xx=>L+(xx/xMax)*(R-L);
+  const A=cv("--accent"), A2=cv("--accent2"), KE=cv("--kelly"),
+        HS=cv("--house"), RF=cv("--roof"), LN=cv("--line");
+  const b=boundaries(d), n=b.length-1;
+  const BH=44, RH=16;
+  let s="";
+  s+=el("rect",{x:px(d.xbar),y:base-22,width:R-px(d.xbar),height:22,fill:KE,opacity:.22});
+  s+=el("text",{x:(px(d.xbar)+R)/2,y:base+26,"text-anchor":"middle","font-size":16,fill:KE},"farmland");
+  s+=pth("M "+L+" "+base+" L "+R+" "+base, LN, 2.5);
+  for(let k=0;k<n;k++){
+    const x0=px(b[k]), x1=px(b[k+1]), gap=Math.min(1.6,(x1-x0)*0.22), ww=Math.max(1,x1-x0-gap);
+    // narrow blocks get a shallower roof and less overhang rather than none at all
+    const rh=Math.min(RH,ww*0.75+2), ov=Math.min(1,ww*0.12), op=k%2?.7:.92;
+    s+=el("rect",{x:x0,y:base-BH,width:ww,height:BH,fill:HS,opacity:op});
+    s+=el("path",{d:"M "+(x0-ov)+" "+(base-BH)+" L "+(x0+ww/2)+" "+(base-BH-rh)+" L "+
+      (x0+ww+ov)+" "+(base-BH)+" Z",fill:RF,opacity:op});
+  }
+  s+=el("circle",{cx:L,cy:base,r:8,fill:"none",stroke:A,"stroke-width":3});
+  s+=el("text",{x:L,y:base+26,"text-anchor":"middle","font-size":15,fill:A},"CBD");
+  s+=pth("M "+px(d.xbar)+" "+(base-BH-RH-14)+" L "+px(d.xbar)+" "+(base+10), KE, 2, {"stroke-dasharray":"5 4"});
+  s+=el("text",{x:px(d.xbar),y:base-BH-RH-22,"text-anchor":"middle","font-size":17,fill:KE,
+    "font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"x̄ = "+fmt(d.xbar,1)+" km");
+  if(x<=d.xbar){
+    s+=pth("M "+px(x)+" "+(base-BH-RH-6)+" L "+px(x)+" "+(base+22), A2, 2.5);
+    s+=el("circle",{cx:px(x),cy:base,r:9,fill:A2,stroke:cv("--panel"),"stroke-width":3});
+    s+=el("text",{x:px(x),y:base+44,"text-anchor":"middle","font-size":15,fill:A2,
+      "font-family":"Roboto Mono,monospace"},fmt(x,1)+" km");
+  }
+  $("packedLabel").innerHTML =
+    "Houses get bigger further out, and the city stops where farmers outbid residents";
+  return s;
+}
+
+/* -------------------------------------------------------------- charts */
+function chart(id,fn,xMax,yHint,color,d,opt){
+  opt=opt||{};
+  const wide=!!opt.wide;
+  const W=wide?1000:560, H=wide?300:230,
+        m=wide?{l:92,r:34,t:26,b:56}:{l:62,r:20,t:18,b:40},
+        FS=wide?19:15;
+  $(id).setAttribute("viewBox","0 0 "+W+" "+H);
+  const MU=cv("--muted"), GR=cv("--grid"), A2=cv("--accent2");
+  let raw=yHint||0; const pts=[];
+  for(let i=0;i<=200;i++){
+    const xx=xMax*i/200, v=fn(xx);
+    if(isFinite(v)){pts.push([xx,v]); if(v>raw)raw=v;} else pts.push(null);
+  }
+  const yMax=niceMax(raw*1.06);
+  const sx=xx=>m.l+(xx/xMax)*(W-m.l-m.r), sy=v=>H-m.b-(v/yMax)*(H-m.t-m.b);
+  let s="";
+  for(let i=1;i<=3;i++) s+=pth("M "+m.l+" "+sy(yMax*i/4)+" L "+(W-m.r)+" "+sy(yMax*i/4), GR, 1.5);
+  s+=pth("M "+m.l+" "+m.t+" L "+m.l+" "+(H-m.b)+" L "+(W-m.r)+" "+(H-m.b), MU, 1.8);
+  let dd="",pen=false;
+  for(const p of pts){
+    if(!p){pen=false;continue;}
+    dd+=(pen?" L ":"M ")+sx(p[0]).toFixed(1)+" "+sy(p[1]).toFixed(1); pen=true;
+  }
+  if(dd) s+=pth(dd,color,3.2);
+  if(opt.farm&&tab>=4&&d.xbar<xMax){
+    const KE=cv("--kelly");
+    s+=pth("M "+sx(d.xbar)+" "+(H-m.b)+" L "+sx(d.xbar)+" "+m.t, KE, 1.6,{"stroke-dasharray":"5 4",opacity:.8});
+    s+=el("text",{x:sx(d.xbar)+6,y:m.t+15,"font-size":15,fill:KE,"font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"x̄");
+  }
+  const v=fn(x);
+  // the slope of the rent curve is -t/l*(x): draw it, so its steepness is visible
+  if(opt.slope&&isFinite(v)&&x<=xMax){
+    const g=opt.slope(x), run=0.17*xMax;
+    const x0=Math.max(0,x-run), x1=Math.min(xMax,x+run);
+    s+=pth("M "+sx(x0)+" "+sy(v+g*(x0-x))+" L "+sx(x1)+" "+sy(v+g*(x1-x)),
+      cv("--ink"), 2.2, {opacity:.55});
+  }
+  if(isFinite(v)&&x<=xMax){
+    s+=pth("M "+sx(x)+" "+(H-m.b)+" L "+sx(x)+" "+sy(v), A2, 1.6,{"stroke-dasharray":"3 4",opacity:.85});
+    s+=el("circle",{cx:sx(x),cy:sy(v),r:wide?8:6,fill:A2,stroke:cv("--panel"),"stroke-width":2.5});
+  }
+  const dec=yMax<1?3:yMax<10?1:0;
+  s+=el("text",{x:m.l-9,y:m.t+FS-4,"text-anchor":"end","font-size":FS,fill:MU,"font-family":"Roboto Mono,monospace"},fmt(yMax,dec));
+  s+=el("text",{x:m.l-9,y:H-m.b+5,"text-anchor":"end","font-size":FS,fill:MU},"0");
+  s+=el("text",{x:W-m.r,y:H-m.b+FS+12,"text-anchor":"end","font-size":FS,fill:MU},"km from CBD");
+  if(opt.ylab) s+=el("text",{x:m.l-9,y:m.t-8,"text-anchor":"end","font-size":FS+3,fill:MU,
+    "font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},opt.ylab);
+  $(id).innerHTML=s;
+}
+
+/* --------------------------------------------------------------- steps */
+const STEPS=[
+ {n:1,label:"The City as a Line",
+  title:"Live anywhere on the line, but farther out leaves less for everything else",
+  body:""},
+ {n:2,label:"Let’s Zoom In on a Point",
+  title:"Suppose we live at x and face rent r — how big a house do we choose?",
+  body:""},
+ {n:3,label:"Rents in the City",
+  title:"What are rents in our city?",
+  body:""},
+ {n:4,label:"How Big Is the City?",
+  title:"How big is the city?",
+  body:""},
+ {n:5,label:"Explore",
+  title:"The whole model, in five parameters",
+  body:"Change one and watch the city redraw itself."}
+];
+const SHOW={
+ 1:{line:1,bar:1,budget:1,lot:0,choice:0,rent:0,size:0,packed:0,params:0,ros:0},
+ 2:{line:0,bar:0,budget:0,lot:1,choice:1,rent:0,size:0,packed:0,params:0,ros:0,util:1},
+ 3:{line:1,bar:1,budget:0,lot:1,choice:0,rent:1,size:0,packed:0,params:0,ros:1,assume:1,rentalg:1,grad:1},
+ 4:{line:0,bar:0,budget:0,lot:0,choice:0,rent:0,size:0,packed:1,params:0,ros:1,closes:1,cityalg:1},
+ 5:{line:0,bar:1,budget:0,lot:1,choice:0,rent:1,size:0,packed:1,params:1,ros:1}
+};
+
+const ORD={1:{bLine:1,bBar:2,bBudget:3},
+           2:{bCols:1,bUtil:2},
+           3:{bAssume:1,bLine:2,bCols:3,bBar:4,bRentAlg:5},
+           4:{bCloses:1,bPacked:2,bCityAlg:3},
+           5:{bPacked:2,bBar:3,bCols:4}};
+const BLOCKS=["bAssume","bCloses","bLine","bBudget","bPacked","bBar","bCols","bUtil",
+              "bRentAlg","bCityAlg"];
+
+/* One equation carries steps 1 and 2: the symbols stay put and the numbers
+   underneath fill in as the model earns them. */
+function drawEq(d){
+  const B=bundle(d), rhs=(tab>=2);
+  const cells=[
+    {sym:"y",val:fmt(P.y,0)},
+    {op:"\u2212",cls:"commute"},
+    {sym:"t",val:trim(P.t),cls:"commute"},
+    {op:"\u00b7",cls:"commute"},
+    {sym:"x",val:fmt(x,1),cls:"commute"},
+    {op:"="},
+    {sym:"c",val:rhs?fmt(B.c,1):"",cls:"spend live"},
+    {op:"+",cls:"spend"},
+    {sym:"r",val:rhs?fmt(B.r,0):"",cls:"spend"},
+    {op:"\u00b7",cls:"spend"},
+    {sym:"\u2113",val:rhs?fmt(B.l):"",cls:"spend live"}
+  ];
+  $("budgetEq").innerHTML=cells.map(c=>c.op
+    ? '<span class="op '+(c.cls||"")+'">'+c.op+'</span>'
+    : '<span class="tok '+(c.cls||"")+'"><span class="sym">'+c.sym+
+      '</span><span class="val">'+(c.val||"")+'</span></span>').join("");
+}
+
+/* Utility with the budget already substituted in: U(l) = l^a (y - tx - r*l)^(1-a).
+   Plotted against l this IS the constrained problem — it falls to zero at both
+   ends (no house; nothing left to eat), so the best size has to be interior. */
+function drawUtil(d){
+  const B=bundle(d), a=P.alpha, lmax=maxAfford(x);
+  const r=rGiven();
+  const U=l=>uOf(l,disp(x)-r*l);
+  const lStar=lOf(x,r), uStar=U(lStar), uNow=U(B.l);
+
+  $("utilEq").innerHTML=[
+    {sym:"U",val:fmt(uNow)},
+    {op:"="},
+    {sym:"\u2113<sup>\u03b1</sup>",val:fmt(B.l)+"<sup>"+fmt(a,2)+"</sup>",cls:"house"},
+    {op:"\u00b7"},
+    {sym:"c<sup>1\u2212\u03b1</sup>",val:fmt(B.c,1)+"<sup>"+fmt(1-a,2)+"</sup>",cls:"cons"}
+  ].map(c=>c.op
+    ? '<span class="op">'+c.op+'</span>'
+    : '<span class="tok '+(c.cls||"")+'"><span class="sym">'+c.sym+
+      '</span><span class="val">'+c.val+'</span></span>').join("");
+
+  const W=1000,H=220,m={l:56,r:26,t:20,b:46};
+  const MU=cv("--muted"), GR=cv("--grid"), A2=cv("--accent2"), IK=cv("--ink");
+  const yMax=(uStar*1.14)||1;
+  const sx=l=>m.l+(l/lmax)*(W-m.l-m.r), sy=v=>H-m.b-(v/yMax)*(H-m.t-m.b);
+  let g="";
+  for(let i=1;i<=3;i++) g+=pth("M "+m.l+" "+sy(yMax*i/4)+" L "+(W-m.r)+" "+sy(yMax*i/4), GR, 1.5);
+  let dd="";
+  for(let i=0;i<=240;i++){
+    const l=lmax*i/240;
+    dd+=(i?" L ":"M ")+sx(l).toFixed(1)+" "+sy(U(l)).toFixed(1);
+  }
+  const area=dd+" L "+sx(lmax).toFixed(1)+" "+(H-m.b)+" L "+sx(0).toFixed(1)+" "+(H-m.b)+" Z";
+  g+=el("path",{d:area,fill:A2,opacity:.09});
+  g+=pth("M "+m.l+" "+m.t+" L "+m.l+" "+(H-m.b)+" L "+(W-m.r)+" "+(H-m.b), MU, 1.8);
+  g+=pth(dd,A2,3.2);
+  g+=pth("M "+sx(lStar)+" "+(H-m.b)+" L "+sx(lStar)+" "+sy(uStar), IK, 1.6,{"stroke-dasharray":"5 4",opacity:.5});
+  g+=el("text",{x:sx(lStar),y:sy(uStar)-15,"text-anchor":"middle","font-size":20,fill:IK,
+    "font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"\u2113*");
+  g+=el("circle",{cx:sx(B.l),cy:sy(uNow),r:9,fill:IK,stroke:cv("--ground"),"stroke-width":3});
+  g+=el("text",{x:m.l,y:H-m.b+26,"font-size":15,fill:MU},"no house");
+  g+=el("text",{x:W-m.r,y:H-m.b+26,"text-anchor":"end","font-size":15,fill:MU},"nothing left to eat");
+  g+=el("text",{x:m.l-10,y:m.t+11,"text-anchor":"end","font-size":18,fill:MU,
+    "font-family":"STIX Two Text,Newsreader,serif","font-style":"italic"},"U");
+  g+=el("text",{x:(W-m.r+m.l)/2,y:H-m.b+43,"text-anchor":"middle","font-size":16,fill:MU},"house size");
+  $("utilSvg").innerHTML=g;
+
+  $("utilNote").innerHTML = (uStar>0 && uNow/uStar>0.999)
+    ? '<span class="v" style="color:var(--accent2);font-size:var(--fs-m)">\u2113* = \u03b1(y \u2212 tx)/r</span>'
+      +' <span class="mono" style="color:var(--accent2)">= '+fmt(P.alpha,2)+" \u00d7 "+fmt(disp(x),1)
+      +" / "+fmt(r,1)+" = "+fmt(lStar)+'</span>'
+    : "";
+}
+
+/* The derivation exactly as 02_demand.tex does it: substitute the budget, take
+   logs (a monotone transformation, so the maximiser is unchanged), then the
+   first-order condition. Ruby/teal follow the deck's own colouring. */
+function drawAlg(){
+  const L="<i>\u2113</i>", C="<i>c</i>", A="<i>\u03b1</i>", R="<i>r</i>",
+        Y="<i>y</i> \u2212 <i>t</i><i>x</i>",
+        B="("+Y+" \u2212 "+R+L+")",
+        BB=Y+" \u2212 "+R+L,
+        fr=(n,dd)=>'<span class="frac"><span>'+n+'</span><span>'+dd+'</span></span>',
+        ru=q=>'<span class="ru">'+q+'</span>', al=q=>'<span class="al">'+q+'</span>';
+  const rows=[
+   ["mx","max<sub>"+C+", "+L+"</sub>&nbsp; <i>U</i>("+C+", "+L+") = "+
+        ru(L+"<sup>"+A+"</sup>"+C+"<sup>1\u2212"+A+"</sup>")+
+        "&nbsp;&nbsp;&nbsp;subject to&nbsp;&nbsp;&nbsp;"+al(C+" = "+BB)],
+   ["mx","max<sub>"+L+"</sub>&nbsp; <i>U</i>("+L+") = "+
+        ru(L+"<sup>"+A+"</sup>")+al(B+"<sup>1\u2212"+A+"</sup>")],
+   ["step","ln(\u00b7) is strictly increasing, so the same "+L+" maximises ln <i>U</i>("+L+")"],
+   ["mx","ln <i>U</i>("+L+") = "+ru(A+" ln "+L)+" + "+al("(1\u2212"+A+") ln"+B)],
+   ["step","set the derivative to zero"],
+   ["mx",ru(fr(A,L))+" \u2212 "+al(fr("(1\u2212"+A+")"+R,BB))+" = 0"],
+   ["mx",ru(fr(A,L))+" = "+al(fr("(1\u2212"+A+")"+R,BB))],
+   ["step","cross-multiplying"],
+   ["mx",A+B+" = (1\u2212"+A+")"+R+L],
+   ["mx","\u21d2&nbsp; "+A+"("+Y+") = (1\u2212"+A+")"+R+L+" + "+A+R+L],
+   ["mx","\u21d2&nbsp; "+A+"("+Y+") = "+R+L],
+   ["mx","\u21d2&nbsp; "+ru(L+"* = "+fr(A+"("+Y+")",R))],
+   ["mx",al(C+"* = "+Y+" \u2212 "+R+L+"* = (1\u2212"+A+")("+Y+")")]
+  ];
+  $("algBody").innerHTML=rows.map(q=>'<div class="'+q[0]+'">'+q[1]+'</div>').join("");
+}
+
+/* Equal utility everywhere pins rents down. The derivation sits behind a
+   disclosure below the figures, written the way 02_demand.tex writes it. */
+function drawRentAlg(){
+  const A="<i>\u03b1</i>", R="<i>r</i>(<i>x</i>)", U="<i>\u016b</i>",
+        Y="<i>y</i> \u2212 <i>t</i><i>x</i>",
+        fr=(n,dd)=>'<span class="frac"><span>'+n+'</span><span>'+dd+'</span></span>',
+        K=A+"<sup>"+A+"</sup>(1\u2212"+A+")<sup>1\u2212"+A+"</sup>";
+  const rows=[
+   ["step","the same utility at every location"],
+   ["mx","<i>U</i>(<i>c</i>*(<i>x</i>), <i>\u2113</i>*(<i>x</i>)) = "+U+"&nbsp;&nbsp;for any <i>x</i>"],
+   ["mx",'<span class="ru">['+fr(A+"("+Y+")",R)+"]<sup>"+A+"</sup></span>"+
+         '<span class="al">[(1\u2212'+A+")("+Y+")]<sup>1\u2212"+A+"</sup></span> = "+U],
+   ["step","collect the powers of ("+Y+")"],
+   ["mx",K+"("+Y+")&thinsp;"+R+"<sup>\u2212"+A+"</sup> = "+U],
+   ["mx",R+"<sup>"+A+"</sup> = "+fr(K+"("+Y+")",U)],
+   ["step","raise both sides to the power 1/"+A],
+   ["mx",'<span class="ru">'+R+" = "+A+"(1\u2212"+A+")<sup>"+fr("1\u2212"+A,A)+"</sup>"+
+         "<span style=\"font-size:1.3em;vertical-align:-.1em\">(</span>"+fr(Y,U)+
+         "<span style=\"font-size:1.3em;vertical-align:-.1em\">)</span><sup>"+fr("1",A)+"</sup></span>"]
+  ];
+  $("rentAlgBody").innerHTML=rows.map(q=>'<div class="'+q[0]+'">'+q[1]+'</div>').join("");
+}
+
+/* How the city's size is pinned down. The integral is the hard part for
+   students, so every move in it gets its own line. */
+function drawCityAlg(){
+  const A="<i>\u03b1</i>", R="<i>r</i>", L="<i>\u2113</i>*(<i>x</i>)", XB="<i>x\u0304</i>",
+        N="<i>N</i>", T="<i>t</i>", RA="<i>r<sub>A</sub></i>", U="<i>\u016b</i>*",
+        Y="<i>y</i>", DX=" d<i>x</i>",
+        fr=(n,dd)=>'<span class="frac"><span>'+n+'</span><span>'+dd+'</span></span>',
+        I="<span style=\"font-size:1.6em;vertical-align:-.26em\">\u222b</span>"+
+          "<sub>0</sub><sup>"+XB+"</sup>&thinsp;",
+        DR=fr("\u2202"+R+"(<i>x</i>)","\u2202<i>x</i>");
+  const rows=[
+   ["step","first condition: one over house size is how many people live per km at <i>x</i>, "+
+     "so adding that up from the centre to the boundary has to give the whole population"],
+   ["mx",I+fr("1",L)+DX+" = "+N],
+   ["step","the rent gradient hands us that density directly"],
+   ["mx",DR+" = "+fr("\u2212"+T,L)+"&nbsp;&nbsp;\u21d2&nbsp;&nbsp;"+
+        '<span class="al">'+fr("1",L)+" = \u2212"+fr("1",T)+DR+"</span>"],
+   ["step","substitute that in, and take the constant outside the integral"],
+   ["mx",I+fr("1",L)+DX+" = \u2212"+fr("1",T)+I+DR+DX],
+   ["step","the integral of a derivative is just the total change in the function"],
+   ["mx",I+DR+DX+" = "+R+"("+XB+") \u2212 "+R+"(0)"],
+   ["step","so the first condition says"],
+   ["mx",fr(R+"(0) \u2212 "+R+"("+XB+")",T)+" = "+N],
+   ["step","now the second condition: at the boundary, land is worth the same as farmland"],
+   ["mx",R+"("+XB+") = "+RA+"&nbsp;&nbsp;\u21d2&nbsp;&nbsp;"+
+        '<span class="al">'+R+"(0) = "+T+N+" + "+RA+"</span>"],
+   ["step","rent at the centre is now known, so utility there is too"],
+   ["mx",'<span class="ru">'+U+" = "+
+        "<span style=\"font-size:1.25em;vertical-align:-.1em\">(</span>"+
+        fr(A+Y,T+N+" + "+RA)+"<span style=\"font-size:1.25em;vertical-align:-.1em\">)</span><sup>"+A+
+        "</sup>[(1\u2212"+A+")"+Y+"]<sup>1\u2212"+A+"</sup></span>"],
+   ["step","finally, the rent function has to give "+RA+" at the boundary"],
+   ["mx",RA+" = "+A+"(1\u2212"+A+")<sup>"+fr("1\u2212"+A,A)+"</sup>"+
+        "<span style=\"font-size:1.3em;vertical-align:-.1em\">(</span>"+
+        fr(Y+" \u2212 "+T+XB,U)+"<span style=\"font-size:1.3em;vertical-align:-.1em\">)</span><sup>"+
+        fr("1",A)+"</sup>"],
+   ["step","raise both sides to the power "+A+" and solve for "+XB],
+   ["mx",'<span class="ru">'+XB+" = "+fr("1",T)+
+        "<span style=\"font-size:1.5em;vertical-align:-.16em\">[</span>"+Y+" \u2212 "+
+        fr(U+RA+"<sup>"+A+"</sup>",A+"<sup>"+A+"</sup>(1\u2212"+A+")<sup>1\u2212"+A+"</sup>")+
+        "<span style=\"font-size:1.5em;vertical-align:-.16em\">]</span></span>"]
+  ];
+  $("cityAlgBody").innerHTML=rows.map(q=>'<div class="'+q[0]+'">'+q[1]+'</div>').join("");
+}
+
+/* Differentiating r(x) and recognising 1/l*(x) in what comes out -- the
+   rd_curve and rdalgebra frames of 02_demand.tex. Every line follows from the
+   one above it by one named operation. */
+function drawGradAlg(){
+  const A="<i>\u03b1</i>", R="<i>r</i>(<i>x</i>)", L="<i>\u2113</i>*(<i>x</i>)",
+        U="<i>\u016b</i>", Y="<i>y</i> \u2212 <i>t</i><i>x</i>", T="<i>t</i>",
+        fr=(n,dd)=>'<span class="frac"><span>'+n+'</span><span>'+dd+'</span></span>',
+        BR="[(1\u2212"+A+")("+Y+")]<sup>"+fr("1\u2212"+A,A)+"</sup>";
+  const rows=[
+   ["mx",R+" = "+A+"(1\u2212"+A+")<sup>"+fr("1\u2212"+A,A)+"</sup>"+
+        "<span style=\"font-size:1.3em;vertical-align:-.1em\">(</span>"+fr(Y,U)+
+        "<span style=\"font-size:1.3em;vertical-align:-.1em\">)</span><sup>"+fr("1",A)+"</sup>"],
+   ["step","differentiate with respect to <i>x</i>"],
+   ["mx",'<span class="al">'+fr("\u2202"+R,"\u2202<i>x</i>")+" = \u2212"+T+
+        U+"<sup>\u2212"+fr("1",A)+"</sup>"+BR+"</span>"],
+   ["step","separately, utility is \u016b at every location, with <i>c</i>* = (1\u2212"+
+        A+")("+Y+")"],
+   ["mx","["+L+"]<sup>"+A+"</sup>[(1\u2212"+A+")("+Y+")]<sup>1\u2212"+A+"</sup> = "+U],
+   ["step","raise both sides to the power 1/"+A],
+   ["mx",L+"&thinsp;"+BR+" = "+U+"<sup>"+fr("1",A)+"</sup>"],
+   ["step","and rearrange"],
+   ["mx",'<span class="al">'+fr("1",L)+" = "+U+"<sup>\u2212"+fr("1",A)+"</sup>"+BR+"</span>"],
+   ["step","the right-hand side is exactly what multiplies \u2212<i>t</i> in the derivative above"],
+   ["mx",'<span class="ru">'+fr("\u2202"+R,"\u2202<i>x</i>")+" = "+fr("\u2212"+T,L)+
+        "</span> &lt; 0"]
+  ];
+  $("gradAlgBody").innerHTML=rows.map(q=>'<div class="'+q[0]+'">'+q[1]+'</div>').join("");
+}
+
+let zoomAnim=null;
+/* Arriving at step 2 dives into the point on the line, then gets out of the way. */
+function playZoom(){
+  const z=$("zoomer"), inner=$("zoomInner");
+  if(zoomAnim){try{zoomAnim.cancel();}catch(_){}}
+  z.hidden=true;
+  if(!inner.animate || (window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches)) return;
+  const d=D(), vm=viewMax(d), cx=48+(clamp(x,0,vm)/vm)*(952-48);
+  $("zoomSvg").innerHTML=drawLine(d,true,"zoomSvg");
+  inner.style.transformOrigin=(cx/10).toFixed(1)+"% 50%";
+  z.hidden=false;
+  zoomAnim=inner.animate(
+    [{transform:"scale(1)",opacity:1},
+     {transform:"scale(1.8)",opacity:1,offset:.42},
+     {transform:"scale(13)",opacity:0}],
+    {duration:900,easing:"cubic-bezier(.45,0,.72,1)",fill:"forwards"});
+  zoomAnim.onfinish=()=>{z.hidden=true;};
+  $("bUtil").animate([{opacity:0},{opacity:0,offset:.5},{opacity:1}],{duration:1000,easing:"ease-out"});
+}
+
+function render(){
+  const d=D(); x=clamp(x,0,viewMax(d)); const S=SHOW[tab];
+  $("bLine").hidden=!S.line; $("bBar").hidden=!S.bar; $("bLot").hidden=!S.lot;
+  $("bRent").hidden=!S.rent; $("bPacked").hidden=!S.packed;
+  $("bParams").hidden=!S.params; $("ros").hidden=!S.ros; $("bUtil").hidden=!S.util;
+  $("bAssume").hidden=!S.assume; $("bRentAlg").hidden=!S.rentalg;
+  $("bCloses").hidden=!S.closes; $("bCityAlg").hidden=!S.cityalg;
+  $("bGradAlg").hidden=!S.grad;
+  $("bBudget").hidden=!S.budget; $("bChoice").hidden=!S.choice;
+  $("colLeft").hidden=!S.lot; $("colRight").hidden=!(S.rent||S.choice);
+  if(tab===2) $("lotLabel").innerHTML = 'at <span class="v">x</span> = <span class="mono">'+
+    fmt(x,1)+'</span> km, budget remaining <span class="mono">'+fmt(disp(x),1)+
+    '</span>, paying rent <span class="v">r</span> = <span class="mono">'+fmt(rGiven(),1)+'</span>';
+  else $("lotLabel").textContent = "What that buys, here";
+  const twoCol = tab!==2 && S.lot && (S.rent||S.choice);
+  $("bCols").hidden = !(S.lot||S.rent||S.choice);
+  $("bCols").style.gridTemplateColumns = twoCol ? "minmax(0,1fr) minmax(0,1fr)" : "minmax(0,1fr)";
+  const o=ORD[tab]||{};
+  BLOCKS.forEach(id=>{$(id).style.order=String(o[id]||4);});
+  $("narr").style.order="0"; $("ros").style.order="6"; $("bGradAlg").style.order="7";
+  $("bParams").style.order = (tab===5) ? "1" : "8";
+  $("foot").style.order="9";
+  $("foot").hidden = tab<=3;
+  $("nBody").hidden = !STEPS[tab-1].body;
+
+  if(S.budget) drawEq(d);
+  if(S.util){ drawUtil(d); drawAlg(); }
+  if(S.rentalg) drawRentAlg();
+  if(S.cityalg) drawCityAlg();
+  if(S.grad) drawGradAlg();
+  if(S.choice) $("lSlide").value = (bundle(d).l/maxAfford(x)).toFixed(3);
+  if(S.line) $("cityLine").innerHTML=drawLine(d);
+  if(S.bar)  drawBar(d);
+  if(S.lot)  $("lotSvg").innerHTML=drawLot(d);
+  if(S.packed) $("packedSvg").innerHTML=drawPacked(d);
+
+  const xMax = (tab>=4) ? d.xbar*1.16 : d.xbar;
+  const showSeg=(tab===3||tab===5), pm=showSeg?plotMode:"rent";
+  $("viewSeg").hidden = !showSeg;
+  $("rentLabel").innerHTML = pm==="rent"
+    ? 'Rent <span class="v">r</span>(<span class="v">x</span>)'
+    : pm==="size"
+    ? 'House size <span class="v">\u2113</span>*(<span class="v">x</span>)'
+    : 'Density 1/<span class="v">\u2113</span>*(<span class="v">x</span>)';
+  if(S.rent){
+    const F = pm==="rent" ? (xx=>xx>d.xbar?P.rA:rEq(xx,d))
+            : pm==="size" ? (xx=>xx>d.xbar?NaN:lOf(xx,rEq(xx,d)))
+            :               (xx=>xx>d.xbar?NaN:1/lOf(xx,rEq(xx,d)));
+    chart("rentSvg", F, xMax, pm==="rent"?d.r0:0,
+      pm==="rent"?cv("--accent"):cv("--accent2"), d,
+      {farm:1, slope:(tab===3&&pm==="rent") ? (xx=>-P.t/lOf(xx,rEq(xx,d))) : null});
+  }
+
+  if(S.ros){
+    const B=bundle(d), r=B.r, l=B.l;
+    let h='<div class="ro a"><span class="k">rent <span class="v">r</span>(<span class="v">x</span>)</span><span class="n">'+fmt(r,1)+'</span></div>'+
+          '<div class="ro b"><span class="k">house size <span class="v">ℓ</span>*</span><span class="n">'+fmt(l)+'</span></div>'+
+          '<div class="ro"><span class="k">utility, at every location</span><span class="n">'+fmt(d.ubar)+'</span></div>';
+    if(tab>=4) h+='<div class="ro b"><span class="k">density 1/<span class="v">ℓ</span>*</span><span class="n">'+fmt(1/l)+'</span></div>'+
+                  '<div class="ro a"><span class="k">city boundary <span class="v">x̄</span></span><span class="n">'+fmt(d.xbar,1)+'</span></div>';
+    $("ros").innerHTML=h;
+  }
+
+  $("foot").innerHTML = 'Rent falls at exactly <span class="v">∂r/∂x = −t/ℓ*(x)</span> — steeply where houses are small, gently where they are large, which is why the curve is convex.';
+}
+
+$("rail").innerHTML=STEPS.map(s=>'<button type="button" data-s="'+s.n+'" aria-pressed="false">'+esc(s.label)+'</button>').join("");
+$("rail").addEventListener("click",e=>{const b=e.target.closest("button");if(b)setTab(+b.dataset.s);});
+function setTab(n){
+  const arriving = (n===2 && tab!==2);
+  if(arriving) lChoice=0.14*maxAfford(x);   // start away from ℓ*, so there is a search
+  if(zoomAnim && n!==2){try{zoomAnim.cancel();}catch(_){} $("zoomer").hidden=true;}
+  tab=n;
+  document.querySelectorAll("#rail button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.s===n)));
+  $("nTitle").textContent=STEPS[n-1].title; $("nBody").textContent=STEPS[n-1].body;
+  if(n===5) $("bParams").open=true;
+  render();
+  if(arriving) playZoom();
+}
+$("viewSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  plotMode=b.dataset.m;
+  document.querySelectorAll("#viewSeg button").forEach(q=>q.setAttribute("aria-pressed",String(q===b)));
+  render();});
+$("lSlide").addEventListener("input",e=>{
+  lChoice=clamp(+e.target.value,0.004,0.999)*maxAfford(x); render();
+});
+// stretching the house directly: pointer position along the land sets frontage
+(function(){
+  const svg=$("lotSvg"); let down=false;
+  const toL=cx=>{
+    const b=svg.getBoundingClientRect();
+    const vb=((cx-b.left)/b.width)*640;            // into the lot viewBox
+    return clamp(((vb-12)/330)*lotScale(D()),0.004*maxAfford(x),0.999*maxAfford(x));
+  };
+  svg.addEventListener("pointerdown",e=>{
+    if(tab!==2)return; down=true;
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    lChoice=toL(e.clientX); render();
+  });
+  svg.addEventListener("pointermove",e=>{if(down){lChoice=toL(e.clientX);render();}});
+  svg.addEventListener("pointerup",e=>{down=false;try{svg.releasePointerCapture(e.pointerId);}catch(_){}});
+  svg.addEventListener("pointercancel",()=>{down=false;});
+})();
+
+function dragOn(svg,active){
+  let down=false;
+  const toX=cx=>{const d=D(),b=svg.getBoundingClientRect();
+    const packed=svg.id==="packedSvg", L=packed?42:48, R=packed?958:952;
+    const xMax=packed?d.xbar*1.16:viewMax(d);
+    return clamp(((cx-b.left)/b.width*1000-L)/(R-L)*xMax,0,viewMax(d));};
+  svg.addEventListener("pointerdown",e=>{if(!active())return;down=true;
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    x=toX(e.clientX);render();});
+  svg.addEventListener("pointermove",e=>{if(down){x=toX(e.clientX);render();}});
+  svg.addEventListener("pointerup",e=>{down=false;try{svg.releasePointerCapture(e.pointerId);}catch(_){}});
+  svg.addEventListener("pointercancel",()=>{down=false;});
+}
+dragOn($("cityLine"),()=>tab!==2);   // frozen on tab 2: pick points, don't traverse
+dragOn($("packedSvg"),()=>true);
+// the household is the one control that was mouse-only; give it arrow keys
+function keysOn(svg,active){
+  svg.setAttribute("tabindex","0");
+  svg.addEventListener("keydown",e=>{
+    if(!active())return;
+    const d=D(), span=viewMax(d), stepv=(e.shiftKey?0.1:0.02)*span;
+    if(e.key==="ArrowRight"||e.key==="ArrowUp") x=clamp(x+stepv,0,span);
+    else if(e.key==="ArrowLeft"||e.key==="ArrowDown") x=clamp(x-stepv,0,span);
+    else if(e.key==="Home") x=0;
+    else if(e.key==="End") x=span;
+    else return;
+    e.preventDefault(); render();
+  });
+}
+keysOn($("cityLine"),()=>tab!==2);
+keysOn($("packedSvg"),()=>true);
+$("cityLine").style.cursor="ew-resize"; $("packedSvg").style.cursor="ew-resize";
+
+const PARS=[
+ {k:"alpha",n:"α — housing share",mn:.15,mx:.55,st:.01,d:2},
+ {k:"y",n:"y — income",mn:60,mx:180,st:1,d:0},
+ {k:"t",n:"t — commuting cost per km",mn:.3,mx:3,st:.05,d:2},
+ {k:"N",n:"N — population (a measure)",mn:10,mx:90,st:1,d:0},
+ {k:"rA",n:"r_A — agricultural rent",mn:1,mx:20,st:.5,d:1}
+];
+$("pgrid").innerHTML=PARS.map(p=>'<div class="p"><div class="plab"><span class="pn">'+esc(p.n)+
+ '</span><span class="pv" id="pv_'+p.k+'"></span></div><input type="range" id="pi_'+p.k+
+ '" min="'+p.mn+'" max="'+p.mx+'" step="'+p.st+'"></div>').join("");
+PARS.forEach(p=>{
+  const i=$("pi_"+p.k); i.value=P[p.k]; $("pv_"+p.k).textContent=(+P[p.k]).toFixed(p.d);
+  i.addEventListener("input",()=>{P[p.k]=+i.value;$("pv_"+p.k).textContent=(+P[p.k]).toFixed(p.d);render();});
+});
+setTab(1);
+
+if(window.matchMedia){const mq=matchMedia("(prefers-color-scheme:dark)");
+  mq.addEventListener?mq.addEventListener("change",()=>render()):mq.addListener(()=>render());}
+new MutationObserver(()=>render()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
+</body>
+</html>
