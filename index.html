@@ -1,86 +1,293 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!-- saved from url=(0046)http://www.columbia.edu/~cjh2182/research.html -->
-<html xmlns="http://www.w3.org/1999/xhtml">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="./bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="./style/style.css">
-    <link rel="shortcut icon" href="http://www.columbia.edu/~cjh2182/images/emory.png" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville|Playfair+Display" rel="stylesheet">
-    <title>Christopher Hansman | Economics | Emory University </title>
-    <meta name="keywords" content="Christopher, Chris, Hansman, Christopher Hansman, Chris Hansman, economics, Columbia, public economics, applied micro">
-    <meta name="description" content="Homepage for Christopher Hansman, Assistant Professor Of Economics at Emory University">
-    <!--JAVASCRIPT FOR TABLE NAVIGATION-->
-    <script async="" src="./Christopher Hansman _ Economics _ Columbia University_files/analytics.js"></script>
-    <script>
-    (function(i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function() {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o),
-            m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Christopher Hansman | Economics | Emory University</title>
+<meta name="description" content="Christopher Hansman, Associate Professor of Economics at Emory University.">
+<link rel="shortcut icon" href="./images/emory.png" type="image/x-icon">
+<style>
+    :root {
+        /* sampled from the photo's own backdrop (#DDEAEC averaged), lifted
+           slightly so body text still sits comfortably on it */
+        --paper: #E2ECED;
+        --ink:   #12181a;          /* near-black, cooled to match the ground */
+        /* 4.57:1 on --paper. The previous #6d7a7c measured 3.69:1 and this
+           grey carries about half the characters on the page, so it was
+           failing WCAG AA on the majority of the actual content. */
+        --quiet: #606b6d;
+        --rule:  rgba(18,24,26,0.15);
+    }
+    /* Inter Light, subset by Google's text= parameter to just the glyphs in
+       the name (2,124 bytes). Without it, font-weight:300 falls back to Arial
+       Regular on Windows and Linux — Arial ships no Light, and browsers
+       synthesize bolder weights but never lighter ones. */
+    @font-face {
+        font-family: "Name Display";
+        src: url(./fonts/inter-light-name.woff2) format("woff2");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+20, U+43, U+48, U+61, U+65, U+68-69, U+6d-70, U+72-74;
+    }
 
-    ga('create', 'UA-60182074-1', 'auto');
-    ga('send', 'pageview');
-    </script>
+    html { background: var(--paper); }
+
+    /* Everything below scales continuously with the viewport instead of
+       snapping at a breakpoint, so there is no single width where the page
+       visibly rearranges itself. The only discrete change left is the
+       masthead wrapping, and that is driven by the content running out of
+       room rather than by an arbitrary pixel value. */
+    body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        /* 14px on a phone up to 15px on a desktop. In rem, so a reader who
+           has raised their browser's default font size gets a bigger page —
+           with the old px clamp a 24px default still rendered 12px text. */
+        font-size: clamp(0.875rem, calc(0.8rem + 0.25vw), 0.9375rem);
+        line-height: 1.55;
+        color: var(--ink);
+        background: var(--paper);
+        margin: 0;
+        /* top is a little more than the sides, since vertical space reads
+           smaller than horizontal at the same measurement */
+        padding: clamp(32px, 5.5vw, 64px)
+                 clamp(20px, 5vw, 60px)
+                 clamp(60px, 9vw, 110px);
+        /* 840px of content at the 60px side padding. The longest title,
+           the Education-Health Gradient note, measures 811px at 15px; the
+           old 800px column gave 680px and wrapped it, and wrapped the
+           Information Frictions title by a single pixel. */
+        max-width: 960px;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Underlined on hover only. This is a deliberate trade: the resting page
+       stays clean, at the cost of links being unmarked on touch devices,
+       where no hover state exists. The focus ring is kept for keyboards. */
+    a { color: inherit; text-decoration: none; }
+    a:hover {
+        text-decoration: underline;
+        text-decoration-color: currentColor;
+        text-underline-offset: 0.18em;
+        text-decoration-thickness: 0.06em;
+    }
+    a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+    .m { color: var(--quiet); }
+    .sep { color: var(--quiet); padding: 0 2px; }
+
+    /* ── the one large gesture on the page, flush left, full width ─ */
+    h1 {
+        font-family: "Name Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(32px, 5.2vw, 46px);
+        font-weight: 300;
+        letter-spacing: -0.025em;
+        line-height: 1.0;
+        margin: 0 0 0.48em 0;      /* tracks the name's own size */
+    }
+
+    /* ── photo left, contact and facts to its right ──────────────── */
+    /* The photo floats rather than sitting in a flex column, so text runs
+       beside it and then reclaims the full width once it clears the bottom.
+       On a phone that means Interests and Education start at the left margin
+       instead of staying indented under a photo that ended above them. */
+    .top { margin-bottom: clamp(28px, 4vw, 40px); }
+    .top::after { content: ""; display: block; clear: both; }
+    /* 9em wide. The contact lines plus the facts block come to 9em × the
+       photo's 503:640 aspect, so its bottom edge lands on the last line of
+       Education — and because both sides are now in em, that alignment
+       holds at every font size rather than only at 12px. */
+    .portrait {
+        /* holds 9em down to ~525px, then shrinks rather than crowding the
+           text beside it into an unreadable column */
+        float: left;
+        width: clamp(80px, 24vw, 9em);
+        margin-right: clamp(14px, 4vw, 26px);
+        height: auto;
+        display: block;
+    }
+    /* wraps below the photo once it has less than 20em to work with */
+    .details { min-width: 0; }
+
+    .masthead div { margin: 0; }
+    .masthead { margin-bottom: 1.667em; }
+
+    .facts .row { display: flex; flex-wrap: wrap; }
+    .facts .row + .row { margin-top: 0.5em; }
+    .facts .k { color: var(--quiet); flex: 0 0 5.5em; }
+    .facts .v { flex: 1 1 300px; text-wrap: pretty; }  /* drops below its label when cramped */
+    .facts .deg { display: block; }
+
+    /* the section ids are link targets for the research.html and
+       teaching.html redirect stubs; without this an arrival lands with the
+       heading flush against the window edge and its rule cropped */
+    h2.label { scroll-margin-top: 1.2em; }
+
+    /* ── sections: a hairline does the work a heading used to ────── */
+    /* One wrapper shrinks to the widest line on the whole page, and every
+       section fills it — so all four rules are the same length, set by the
+       longest title anywhere rather than per section. The buffer below adds
+       a little air between that longest title and the rule end. Both are
+       self-maintaining: add a longer paper and every rule grows with it. */
+    .sections { width: fit-content; max-width: 100%; }
+    .entry .t, .teach li { padding-right: 14px; }
+    h2.label {
+        font-size: 1em;
+        border-top: 1px solid var(--rule);
+        padding-top: 13px;
+        margin: 3.2em 0 1.5em 0;
+        font-weight: bold;
+        letter-spacing: 0.02em;
+    }
+
+    /* ── entries set as bibliography: flush title, indented notes ── */
+    ul.entries, ul.teach { list-style: none; margin: 0; padding: 0; }
+    .entry { margin-bottom: 1.3em; }
+    .entry .t { display: block; text-wrap: pretty; }
+    /* the indent is held at 14px even on a phone: where titles wrap to two
+       and three lines it is the only thing marking where an entry starts */
+    .entry .m { padding-left: clamp(14px, calc(5vw - 20px), 22px); }
+
+    /* one line per course, so they sit closer than bibliography entries */
+    .teach li { margin-bottom: 0.25em; }
+
+    /* Below 620px the facts values drop beneath their labels the label
+       goes full-width here, so the query itself forces the stack instead of
+       the two thresholds chasing each other. Left alone the
+       labels read as two stray grey lines; this makes them read as labels -
+       smaller and letterspaced, tight to their value, with a clear gap
+       between the two pairs. The only breakpoint on the page, and it restyles
+       one block rather than rearranging the layout. */
+    @media (max-width: 620px) {
+        .facts .k {
+            /* full width, so the value is forced below rather than the
+               restyled label's own width deciding whether it stacks */
+            flex: 0 0 100%;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            line-height: 1.4;
+        }
+        .facts .row + .row { margin-top: 1.15em; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+        /* --quiet raised from #7f8b8c (5.15:1) to 7.06:1 */
+        :root { --paper:#121717; --ink:#e6eded; --quiet:#98a4a5; --rule:rgba(230,237,237,0.16); }
+        .portrait { filter: brightness(0.92); }
+    }
+    @media print {
+        :root { --paper:#fff; --ink:#000; --quiet:#444; --rule:#bbb; }
+        body { padding:0; max-width:none; font-size:10pt; }
+        h1 { font-size: 30pt; }
+        .portrait { display: none; }
+    }
+</style>
 </head>
-
 <body>
-    <nav class="navbar navbar-static-top">
-        <div class="container-fluid page-header">
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2 col-xs-12 col-sm-10 col-sm-offset-1">
-                    <div id="name">
-                        <h1>Christopher Hansman</h1>
-                        <h4>Economics Department | Emory University | c.hansman@emory.edu</h4>
-                    </div>
-                    <div class="col-sm-12">
-                        <ul class="nav nav-tabs nav-justified">
-                            <li class="active"><a href="./index.html">Home</a></li>
-                            <li><a href="./ChrisHansman_cv_may2025.pdf">CV</a></li>
-                            <li><a href="./research.html">Research</a></li>
-                            <li><a href="./teaching.html">Teaching</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+
+<main>
+
+<h1>Christopher Hansman</h1>
+
+<div class="top">
+    <img class="portrait" src="./images/headshot_web.jpg" width="503" height="640" alt="Christopher Hansman">
+    <div class="details">
+        <div class="masthead">
+            <div class="m">Associate Professor of Economics, Emory&nbsp;University</div>
+            <div class="m">332 Rich Memorial Building, Atlanta,&nbsp;GA&nbsp;30322</div>
+            <div><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a><span class="sep" aria-hidden="true">&middot;</span><a href="./Hansman_cv_Sept2026.pdf">cv</a></div>
         </div>
-    </nav>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-9 col-md-offset-2 col-sm-11">
-                <img src="./images/hansman_chrisd.jpg" class="profile" style="max-height: 230px">
-                <div class="background">
-                    <ul class="list-unstyled">
-                        <li><b>Assistant Professor of Economics</b></li>
-         
-                        <li><em>Interests:</em>  Household Finance, Corporate Finance, Urban</li>
-               
-                        <li>Ph.D. Economics, Columbia University, 2017</li>
-                        <li>B.S. Mathematics and Economics, University of Chicago, 2009</li>                                               
-                    </ul>
-                    <ul class="list-unstyled">
-                        <li><b>Contact Information</b></li>
-                        <li>332 Rich Memorial Building</li>
-                        <li>Emory University</li>
-                        <li>Atlanta, GA 30307</li>
-                        <li><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a></li>
-                    </ul>
-                </div>
-            </div>
+        <div class="facts">
+            <div class="row"><span class="k">Interests</span><span class="v">Household Finance, Corporate Finance, Urban</span></div>
+            <div class="row"><span class="k">Education</span><span class="v"><span class="deg">PhD in Economics, Columbia&nbsp;University,&nbsp;2017</span><span class="deg">BS in Mathematics and Economics, University&nbsp;of&nbsp;Chicago,&nbsp;2009</span></span></div>
         </div>
     </div>
-    <footer>
-        <span><a href="https://www.emory.edu/">Emory University</a></span>
-        <span>&nbsp;·&nbsp;<a href="https://economics.emory.edu/">Economics Department</a>&nbsp;·&nbsp;</span>
-        <span><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a></span>
-    </footer>
-</body>
+</div>
 
+<div class="sections">
+<section class="sec">
+<h2 class="label" id="publications">Publications</h2>
+
+<ul class="entries">
+
+<li class="entry"><a class="t" href="./FRL_06_11.pdf">Mortgage Choice in Families</a>
+    <div class="m">Finance Research Letters, 107 (2026)</div></li>
+<li class="entry"><a class="t" href="./GHM_1124.pdf">Financial Constraints and the Racial Housing Gap</a>
+    <div class="m">with <a href="https://arpitgupta.info/">A. Gupta</a> and <a href="https://www.pierremabille.com/">P. Mabille</a> &middot; Journal of Financial Economics, 173 (2025)</div></li>
+<li class="entry"><a class="t" href="./HHJLM_June24.pdf">Effects of Credit Expansions on Stock Market Booms and Busts</a>
+    <div class="m">with <a href="https://www.columbia.edu/~hh2679/">H. Hong</a>, <a href="https://sites.google.com/site/jiangwenxi/">W. Jiang</a>, <a href="https://en.gsm.pku.edu.cn/faculty/yjliu/">J. Liu</a> and <a href="https://sites.google.com/site/juanjuanmeng/">J. J. Meng</a> &middot; Review of Financial Studies, 38(5): 1502&ndash;1544 (2025)</div></li>
+<li class="entry"><a class="t" href="./GuptaHansman0421.pdf">Selection, Leverage, and Default in the Mortgage Market</a>
+    <div class="m">with <a href="https://arpitgupta.info/">A. Gupta</a> &middot; Review of Financial Studies, 35(2): 720&ndash;770 (2022)</div>
+    <div class="m">Yuki Arai Faculty Research Prize, Honorable Mention</div></li>
+<li class="entry"><a class="t" href="./HHLT_JPE.pdf">Vertical Integration, Supplier Behavior, and Quality Upgrading among Exporters</a>
+    <div class="m">with <a href="https://www.jonashjort.com">J. Hjort</a>, <a href="https://www.gianmarcoleon.com">G. Le&oacute;n</a> and <a href="https://sites.google.com/view/matthieuteachout/home">M. Teachout</a> &middot; Journal of Political Economy, 128(9): 3570&ndash;3625 (2020)</div>
+    <div class="m">2018 Oliver Williamson Award, SIOE</div></li>
+<li class="entry"><a class="t" href="./HansmanHjortLeon_Dec2017.pdf">Interlinked Firms and the Consequences of Piecemeal Regulation</a>
+    <div class="m">with <a href="https://www.jonashjort.com">J. Hjort</a> and <a href="https://www.gianmarcoleon.com">G. Le&oacute;n</a> &middot; Journal of the European Economic Association, 17(3): 876&ndash;916 (2019)</div></li>
+<li class="entry"><a class="t" href="./GHF_Bail.pdf">The Heavy Costs of High Bail: Evidence from Judge Randomization</a>
+    <div class="m">with E. Frenchman and <a href="https://arpitgupta.info/">A. Gupta</a> &middot; Journal of Legal Studies, 45(2): 471&ndash;505 (2016)</div>
+    <div class="m">Coverage: <a href="http://www.theatlantic.com/business/archive/2016/05/money-bail/484034/">Atlantic</a>, <a href="http://www.vox.com/2016/8/24/12415268/bail-jail-prison-innocent-crime">Vox</a>, <a href="https://psmag.com/how-the-money-bail-system-perpetuates-americas-mass-incarceration-problem-2e03983ed9d9">Pacific Standard</a></div></li>
+<li class="entry"><a class="t" href="http://www.sciencedirect.com/science/article/pii/S016762961200094X">Personality and the Education&ndash;Health Gradient: A Note on &ldquo;Understanding Differences in Health Behaviors by Education&rdquo;</a>
+    <div class="m">with <a href="http://gabriellaconti.org/">G. Conti</a> &middot; Journal of Health Economics, 32(2): 480&ndash;485 (2013)</div></li>
+<li class="entry"><a class="t" href="http://www.pnas.org/content/109/23/8866.abstract">Primate Evidence on the Late Health Effects of Early Life Adversity</a>
+    <div class="m">with <a href="http://gabriellaconti.org/">G. Conti</a>, <a href="https://economics.uchicago.edu/directory/james-j-heckman">J. J. Heckman</a>, M. Novak, A. M. Ruggiero and S. J. Suomi</div>
+    <div class="m">Proceedings of the National Academy of Sciences, 109(23): 8866&ndash;8871 (2012)</div></li>
+
+</ul>
+</section>
+
+<section class="sec">
+<h2 class="label" id="working-papers">Working Papers</h2>
+
+<ul class="entries">
+
+<li class="entry"><a class="t" href="./Portugal_Lending_Nudge_AUG2024.pdf">Information Frictions and Firm Take up of Government Support: A Randomised Controlled Experiment</a>
+    <div class="m">with <a href="https://sites.google.com/site/claudiapcustodio/home">C. Cust&oacute;dio</a> and <a href="https://sites.google.com/view/diogo-mendes/home">D. Mendes</a> &middot; Revise and resubmit, Review of Finance</div></li>
+<li class="entry"><a class="t" href="./BHKV_06_2026.pdf">Information Heterogeneity and the Demand for Healthcare: Evidence from GPs in England</a>
+    <div class="m">with <a href="https://websites.umich.edu/~zachb/">Z. Y. Brown</a>, <a href="https://jordankeener.github.io/">J. Keener</a> and <a href="https://www.andreveiga.com">A. Veiga</a> &middot; Reject and resubmit, American Economic Review</div>
+    <div class="m">Coverage: <a href="https://cepr.org/voxeu/columns/why-high-income-patients-go-higher-quality-doctors">VoxEU</a></div></li>
+<li class="entry"><a class="t" href="./GHR_06_26.pdf">Community Impacts of Incarceration</a>
+    <div class="m">with <a href="https://arpitgupta.info/">A. Gupta</a> and <a href="https://evanriehl.github.io/">E. Riehl</a> &middot; Revise and resubmit, Journal of Policy Analysis and Management</div></li>
+<li class="entry"><a class="t" href="./CHM_Exports_May2024.pdf">Credit Access and Market Access: Evidence from a Portuguese Credit Guarantee Scheme</a>
+    <div class="m">with <a href="https://sites.google.com/site/claudiapcustodio/home">C. Cust&oacute;dio</a> and <a href="https://sites.google.com/view/bernardomendes">B. Mendes</a></div>
+    <div class="m">Coverage: <a href="https://research.pej.pt/2024/06/credit-access-and-market-access-the-sme-leader-program/">Portuguese Economy Research Report</a></div></li>
+<li class="entry"><a class="t" href="./HHPS_June23.pdf">A Sticky-Price View of Hoarding</a>
+    <div class="m">with <a href="https://www.columbia.edu/~hh2679/">H. Hong</a>, <a href="https://www.homepages.ucl.ac.uk/~uctpand/">A. de Paula</a> and <a href="https://www.vishalsingh.org/">V. Singh</a></div>
+    <div class="m">Coverage: <a href="https://www.wsj.com/articles/hoarding-is-an-upper-class-pastime-11588007355">Wall Street Journal</a>, <a href="https://review.chicagobooth.edu/marketing/2020/article/how-retailers-inadvertently-contribute-hoarding">Chicago Booth Review</a></div></li>
+
+</ul>
+</section>
+
+<section class="sec">
+<h2 class="label" id="work-in-progress">Work in Progress</h2>
+
+<ul class="entries">
+
+<li class="entry"><span class="t">Heterogeneous Mortgage Choice: Evidence from Denmark</span>
+    <div class="m">with <a href="https://sites.google.com/view/steffenandersen/">S. Andersen</a>, <a href="https://campbell.scholars.harvard.edu/">J. Y. Campbell</a>, <a href="https://www.london.edu/faculty-and-research/faculty-profiles/c/cocco-j-f">J. Cocco</a> and <a href="https://www.tarunramadorai.com/">T. Ramadorai</a></div></li>
+<li class="entry"><span class="t">Inflation Through the Mortgage Market</span>
+    <div class="m">with <a href="https://arpitgupta.info/">A. Gupta</a> and <a href="https://www.pierremabille.com/">P. Mabille</a></div></li>
+<li class="entry"><span class="t">The Nature of Firm Financing and Growth</span>
+    <div class="m">with <a href="https://sites.google.com/view/martinaragoneses">M. Aragoneses</a>, <a href="https://profiles.imperial.ac.uk/d.licher21">D. Licher</a> and <a href="https://profiles.imperial.ac.uk/ramana.nanda">R. Nanda</a></div></li>
+
+</ul>
+</section>
+
+<section class="sec">
+<h2 class="label" id="teaching">Teaching</h2>
+
+<ul class="teach">
+    <li>Housing and Mortgage Markets<span class="sep" aria-hidden="true">&middot;</span><span class="m">Emory</span><span class="sep" aria-hidden="true">&middot;</span><span class="m">BA</span></li>
+    <li>Financial Econometrics<span class="sep" aria-hidden="true">&middot;</span><span class="m">Emory</span><span class="sep" aria-hidden="true">&middot;</span><span class="m">BA</span></li>
+    <li>Household Finance<span class="sep" aria-hidden="true">&middot;</span><span class="m">Emory</span><span class="sep" aria-hidden="true">&middot;</span><span class="m">PhD</span></li>
+    <li>Empirical Finance<span class="sep" aria-hidden="true">&middot;</span><span class="m">Imperial</span><span class="sep" aria-hidden="true">&middot;</span><span class="m">MSc</span></li>
+    <li>Applied Microeconometrics<span class="sep" aria-hidden="true">&middot;</span><span class="m">Imperial</span><span class="sep" aria-hidden="true">&middot;</span><span class="m">PhD</span></li>
+</ul>
+</section>
+</div>
+
+</main>
+
+</body>
 </html>
