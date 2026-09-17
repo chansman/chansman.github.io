@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>10 Year Treasury vs. Mortgage Backed Security</title>
-<meta name="description" content="Comparing a 10-year Treasury note with a mortgage-backed securities ETF: prices, yields, cash received, and what each is worth if sold today.">
+<title>10 Year Treasury Note</title>
+<meta name="description" content="Tracking a 10-year Treasury note: price, yields, coupons received, and what it is worth if sold today.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -108,12 +108,12 @@ footer a{color:inherit}
 <body>
 <div class="wrap">
   <header>
-    <h1>10 Year Treasury vs. Mortgage Backed Security</h1>
+    <h1 id="pagetitle">10 Year Treasury Note</h1>
     <p><span id="asof">loading prices…</span></p>
-    <div class="banner" id="placeholder" hidden>The purchase details below are placeholders until the actual trades are made.</div>
+    <div class="banner" id="placeholder" hidden>The purchase details below are placeholders until the actual trade is made.</div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Securities">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Securities" hidden>
     <button class="tsy" role="tab" id="tab-treasury" aria-controls="panel-treasury" aria-selected="true"><span class="sw"></span><span class="long">10-Year Treasury Note (issued May 2026)</span><span class="short">Treasury (May 2026)</span></button>
     <button class="mbs" role="tab" id="tab-vmbs" aria-controls="panel-vmbs" aria-selected="false"><span class="sw"></span><span class="long">Mortgage-Backed Securities ETF (VMBS)</span><span class="short">MBS ETF (VMBS)</span></button>
   </nav>
@@ -200,7 +200,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
   </section>
 
   <footer>
-    Treasury prices: end-of-day prices from <a href="https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate">TreasuryDirect FedInvest</a>. VMBS prices and distributions: <a href="https://finance.yahoo.com/quote/VMBS/">Yahoo Finance</a>. 10-year yield: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve">U.S. Treasury daily par yield curve</a>. Updated once a day after the market closes. Taxes and trading costs are ignored. <span id="updated"></span>
+    Treasury prices: end-of-day prices from <a href="https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate">TreasuryDirect FedInvest</a>. <span id="vmbs-source" hidden>VMBS prices and distributions: <a href="https://finance.yahoo.com/quote/VMBS/">Yahoo Finance</a>. </span>10-year yield: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve">U.S. Treasury daily par yield curve</a>. Updated once a day after the market closes. Taxes and trading costs are ignored. <span id="updated"></span>
   </footer>
 </div>
 
@@ -503,12 +503,21 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       }
     });
   }
-  show(location.hash === "#vmbs" ? "vmbs" : "treasury", false);
+  show("treasury", false);
 
   const bust = "?t=" + Math.floor(Date.now() / 6e5);
   Promise.all([fetch("trade.json" + bust).then((r) => r.json()), fetch("data/prices.json" + bust).then((r) => r.json())])
     .then(([trade, px]) => {
       TRADE = trade; PX = px;
+      // The VMBS comparison is switched off unless trade.json sets "showVmbs": true
+      if (trade.showVmbs) {
+        $("tabs").hidden = false;
+        $("vmbs-source").hidden = false;
+        $("pagetitle").textContent = document.title = "10 Year Treasury vs. Mortgage Backed Security";
+      } else {
+        show("treasury", false);
+      }
+      if (trade.showVmbs && location.hash === "#vmbs") show("vmbs", false);
       render();
       matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
       let timer; addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(render, 150); });

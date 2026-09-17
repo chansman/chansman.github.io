@@ -1,5 +1,6 @@
 {
  "placeholder": true,
+ "showVmbs": false,
  "treasury": {
   "name": "10-Year U.S. Treasury Note",
   "cusip": "91282CQQ7",
