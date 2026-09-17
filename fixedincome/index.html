@@ -34,11 +34,11 @@ header h1{margin:0;font-size:30px;font-weight:600;letter-spacing:-.02em}
 header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .banner{margin:18px 0 0;padding:10px 14px;border-radius:8px;background:var(--warn-bg);color:var(--warn-ink);font-size:15px}
 
-.spec{margin:16px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 26px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
+.spec{margin:16px 0 0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:18px 26px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
 .spec .k{font-size:13px;color:var(--muted)}
 .spec .v{font-size:21px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin-top:2px}
 .spec .n{font-size:13px;color:var(--ink2);margin-top:2px}
-@media (max-width:860px){.spec{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.spec{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}}
 .summary{margin:12px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .summary>div{background:var(--card);padding:12px 18px}
 .summary .sm{font-size:13px;color:var(--muted);margin-top:2px}
@@ -62,9 +62,9 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .charts .chartbox{margin-top:auto;padding-top:10px}
 @media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}}
 .detailcard{margin-top:18px}
-.detailgrid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px 44px;align-items:start}
-.detailgrid .yields{margin-top:0;padding-top:0;border-top:0;flex-direction:column;gap:14px}
-@media (max-width:900px){.detailgrid{grid-template-columns:minmax(0,1fr)}.detailgrid .yields{flex-direction:row;padding-top:12px;border-top:1px solid var(--line)}}
+.detailgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:12px 44px;align-items:start}
+.detailgrid .yields{margin-top:0;padding-top:4px;border-top:0;flex-direction:column;gap:14px}
+@media (max-width:900px){.detailgrid{grid-template-columns:minmax(0,1fr)}.detailgrid .yields{flex-direction:row;padding:0 0 12px;border-bottom:1px solid var(--line)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
 .card.accent{border-top:4px solid var(--c)}
 .card h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
@@ -107,7 +107,7 @@ footer a{color:inherit}
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Securities">
-    <button class="tsy" role="tab" id="tab-treasury" aria-controls="panel-treasury" aria-selected="true"><span class="sw"></span><span class="long">10-Year Treasury Note</span><span class="short">Treasury Note</span></button>
+    <button class="tsy" role="tab" id="tab-treasury" aria-controls="panel-treasury" aria-selected="true"><span class="sw"></span><span class="long">10-Year Treasury Note (issued May 2026)</span><span class="short">Treasury (May 2026)</span></button>
     <button class="mbs" role="tab" id="tab-vmbs" aria-controls="panel-vmbs" aria-selected="false"><span class="sw"></span><span class="long">Mortgage-Backed Securities ETF (VMBS)</span><span class="short">MBS ETF (VMBS)</span></button>
   </nav>
 
@@ -124,29 +124,29 @@ footer a{color:inherit}
   <section class="panel" role="tabpanel" id="panel-treasury" aria-labelledby="tab-treasury">
     <div class="charts">
       <article class="card">
-        <div class="charthead"><h3>Price per $100 of face value</h3><p>End-of-day price. Dashed lines mark when we bought and the price we paid.</p></div>
-        <div class="chartbox" id="t-box"><svg id="t-chart" role="img" aria-label="Treasury note price history"></svg><div class="tip" id="t-tip" hidden></div></div>
+        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="chartbox" id="ty-box"><svg id="ty-chart" role="img" aria-label="Yield on a newly issued 10-year Treasury note"></svg><div class="tip" id="ty-tip" hidden></div></div>
       </article>
       <article class="card">
-        <div class="charthead"><h3>10-year Treasury yield</h3><p>Daily par yield. Dashed line marks the yield when we bought.</p></div>
-        <div class="chartbox" id="ty-box"><svg id="ty-chart" role="img" aria-label="10-year Treasury yield history"></svg><div class="tip" id="ty-tip" hidden></div></div>
+        <div class="charthead"><h3 id="t-charttitle">Price of our note (issued May 2026)</h3><p>Per $100 of face value. Dashed lines mark when we bought and our price.</p></div>
+        <div class="chartbox" id="t-box"><svg id="t-chart" role="img" aria-label="Price history of our Treasury note"></svg><div class="tip" id="t-tip" hidden></div></div>
       </article>
     </div>
     <article class="card accent detailcard">
       <h2 id="t-name">10-Year U.S. Treasury Note</h2>
       <div class="sub" id="t-sub"></div>
       <div class="detailgrid">
+        <div class="yields">
+          <div><div class="k">Yield to maturity today</div><div class="v num" id="t-ytm"></div></div>
+          <div><div class="k">When we bought</div><div class="v num" id="t-ytm0"></div></div>
+          <div><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
+        </div>
         <table>
           <tr><td>Paid<span class="note" id="t-paidnote"></span></td><td class="num" id="t-paid"></td></tr>
           <tr><td>Worth if sold today<span class="note" id="t-valnote"></span></td><td class="num" id="t-value"></td></tr>
           <tr><td>Coupons received<span class="note" id="t-cashnote"></span></td><td class="num" id="t-cash"></td></tr>
           <tr class="total"><td>Gain or loss</td><td class="num" id="t-gain2"></td></tr>
         </table>
-        <div class="yields">
-          <div><div class="k">Yield to maturity today</div><div class="v num" id="t-ytm"></div></div>
-          <div><div class="k">When we bought</div><div class="v num" id="t-ytm0"></div></div>
-          <div><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
-        </div>
       </div>
     </article>
     <details>
@@ -163,28 +163,28 @@ Gain or loss   = worth if sold + coupons received − paid</div>
   <section class="panel mbs" role="tabpanel" id="panel-vmbs" aria-labelledby="tab-vmbs" hidden>
     <div class="charts">
       <article class="card">
-        <div class="charthead"><h3>Price per share</h3><p>Closing price. Dashed lines mark when we bought and the price we paid.</p></div>
-        <div class="chartbox" id="m-box"><svg id="m-chart" role="img" aria-label="VMBS price history"></svg><div class="tip" id="m-tip" hidden></div></div>
+        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="chartbox" id="my-box"><svg id="my-chart" role="img" aria-label="Yield on a newly issued 10-year Treasury note"></svg><div class="tip" id="my-tip" hidden></div></div>
       </article>
       <article class="card">
-        <div class="charthead"><h3>10-year Treasury yield</h3><p>Daily par yield. Dashed line marks the yield when we bought.</p></div>
-        <div class="chartbox" id="my-box"><svg id="my-chart" role="img" aria-label="10-year Treasury yield history"></svg><div class="tip" id="my-tip" hidden></div></div>
+        <div class="charthead"><h3>VMBS price per share</h3><p>Closing price. Dashed lines mark when we bought and our price.</p></div>
+        <div class="chartbox" id="m-box"><svg id="m-chart" role="img" aria-label="VMBS price history"></svg><div class="tip" id="m-tip" hidden></div></div>
       </article>
     </div>
     <article class="card accent detailcard">
       <h2 id="m-name">Vanguard Mortgage-Backed Securities ETF</h2>
       <div class="sub" id="m-sub"></div>
       <div class="detailgrid">
+        <div class="yields">
+          <div><div class="k">12-month distribution yield</div><div class="v num" id="m-dy"></div></div>
+          <div><div class="k">When we bought</div><div class="v num" id="m-dy0"></div></div>
+        </div>
         <table>
           <tr><td>Paid<span class="note" id="m-paidnote"></span></td><td class="num" id="m-paid"></td></tr>
           <tr><td>Worth if sold today<span class="note" id="m-valnote"></span></td><td class="num" id="m-value"></td></tr>
           <tr><td>Distributions received<span class="note" id="m-cashnote"></span></td><td class="num" id="m-cash"></td></tr>
           <tr class="total"><td>Gain or loss</td><td class="num" id="m-gain2"></td></tr>
         </table>
-        <div class="yields">
-          <div><div class="k">12-month distribution yield</div><div class="v num" id="m-dy"></div></div>
-          <div><div class="k">When we bought</div><div class="v num" id="m-dy0"></div></div>
-        </div>
       </div>
     </article>
     <details>
@@ -271,8 +271,13 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const tGain = tValue + tCash - tPaid;
     const nextCoupon = couponPeriod(t.maturity, D(tLast.date)).next;
 
-    $("t-name").textContent = t.name;
-    $("t-sub").textContent = `CUSIP ${t.cusip}`;
+    const issue = t.issueDate || iso(addMonths(D(t.maturity), -120));
+    const issueMonth = D(issue).toLocaleDateString("en-US", {month: "long", year: "numeric", timeZone: "UTC"});
+    const monthsBetween = (a, b) => { const x = D(a), y = D(b); return (y.getUTCFullYear() - x.getUTCFullYear()) * 12 + y.getUTCMonth() - x.getUTCMonth() - (y.getUTCDate() < x.getUTCDate() ? 1 : 0); };
+    const yearsLeft = (from) => Math.round(days(D(from), D(t.maturity)) / 365.25 * 10) / 10;
+    $("t-name").textContent = `${t.name}, issued ${issueMonth}`;
+    $("t-sub").textContent = `${t.coupon}% note due ${fmtDate(t.maturity)} · CUSIP ${t.cusip}`;
+    $("t-charttitle").textContent = `Price of our note (issued ${D(issue).toLocaleDateString("en-US", {month: "short", year: "numeric", timeZone: "UTC"})})`;
     $("t-paidnote").textContent = `${fmtDate(t.tradeDate)}: price ${t.cleanPrice.toFixed(4)} per $100, plus ${usd(aiPaid)} accrued interest`;
     $("t-paid").textContent = usd(tPaid);
     $("t-valnote").textContent = `${fmtDate(tLast.date)} close: price ${tLast.eod.toFixed(4)} per $100, plus ${usd(aiNow)} accrued interest`;
@@ -325,10 +330,11 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       .map((d) => d.toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"})).join(" and ");
     $("spec").style.setProperty("--c", isT ? "var(--tsy)" : "var(--mbs)");
     $("spec").innerHTML = isT ? spec([
+      ["Issued", fmtDate(issue), "as a new 10-year note"],
       ["Face value", usd(t.face).replace(".00", ""), "repaid at maturity"],
-      ["Coupon", `${t.coupon}% a year`, "paid twice a year"],
+      ["Coupon", `${t.coupon}% a year`, "set at the May 2026 auction".replace("May 2026", issueMonth)],
       ["Each coupon payment", usd(couponAmt), `every ${cDates}`],
-      ["Matures", fmtDate(t.maturity), `${Math.round(days(D(tLast.date), D(t.maturity)) / 365.25 * 10) / 10} years from now`],
+      ["Matures", fmtDate(t.maturity), `${yearsLeft(tLast.date)} years left`],
     ]) : spec([
       ["Shares", `${m.shares}`, "no face value"],
       ["Distributions", "Monthly", "amount changes each month"],
@@ -345,7 +351,8 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const held = days(S.flows[0].date, S.flows[S.flows.length - 1].date);
     $("s-ry").textContent = held < 1 ? `Realized yield: ${pct(0)}`
       : `Realized yield: ${pct(realizedYield(S.flows))} a year`;
-    $("asof").textContent = isT ? `Purchased ${fmtDate(t.tradeDate)} · Price as of ${fmtDate(tLast.date)}`
+    const age = monthsBetween(issue, t.tradeDate);
+    $("asof").textContent = isT ? `Purchased ${fmtDate(t.tradeDate)}, ${age} month${age === 1 ? "" : "s"} after the note was issued on ${fmtDate(issue)}, with ${yearsLeft(t.tradeDate)} years left to maturity · Price as of ${fmtDate(tLast.date)}`
                                 : `Purchased ${fmtDate(m.tradeDate)} · Price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
