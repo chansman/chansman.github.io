@@ -40,7 +40,8 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .spec .n{font-size:13px;color:var(--ink2);margin-top:2px}
 @media (max-width:860px){.spec{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .summary{margin:12px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.summary div{background:var(--card);padding:12px 18px}
+.summary>div{background:var(--card);padding:12px 18px}
+.summary .sm{font-size:13px;color:var(--muted);margin-top:2px}
 .summary .k{font-size:13px;color:var(--muted)}
 .summary .v{font-size:22px;font-weight:500;margin-top:2px}
 @media (max-width:760px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -110,7 +111,7 @@ footer a{color:inherit}
     <div><div class="k">Paid</div><div class="v num" id="s-paid">–</div></div>
     <div><div class="k">Worth if sold today</div><div class="v num" id="s-value">–</div></div>
     <div><div class="k" id="s-cashlabel">Cash received</div><div class="v num" id="s-cash">–</div></div>
-    <div><div class="k">Gain or loss</div><div class="v num" id="s-gain">–</div><div class="k" id="s-gainpct"></div></div>
+    <div><div class="k">Gain or loss</div><div class="v num" id="s-gain">–</div><div class="sm" id="s-gainpct"></div><div class="sm" id="s-ry"></div></div>
   </section>
 
   <!-- Treasury -->
@@ -219,6 +220,16 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     return (lo + hi) / 2;
   }
 
+  // Annual rate r that sets the present value of all cash flows (purchase negative) to zero
+  function realizedYield(flows) {
+    const t0 = flows[0].date;
+    const npv = (r) => flows.reduce((s, f) => s + f.amt / Math.pow(1 + r, days(t0, f.date) / 365), 0);
+    let lo = -0.999999, hi = 1;
+    while (npv(hi) > 0 && hi < 1e9) hi *= 10;
+    for (let i = 0; i < 300; i++) { const mid = (lo + hi) / 2; if (npv(mid) > 0) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+
   let TRADE, PX;
 
   function render() {
@@ -237,7 +248,8 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const tValue = tLast.eod / 100 * t.face + aiNow;
     const couponAmt = t.face * t.coupon / 100 / 2;
     let tCash = 0, received = 0;
-    for (let d = couponPeriod(t.maturity, tSettle).next; d <= D(tLast.date); d = addMonths(d, 6)) { tCash += couponAmt; received++; }
+    const tFlows = [{date: tSettle, amt: -tPaid}];
+    for (let d = couponPeriod(t.maturity, tSettle).next; d <= D(tLast.date); d = addMonths(d, 6)) { tCash += couponAmt; received++; tFlows.push({date: d, amt: couponAmt}); }
     const tGain = tValue + tCash - tPaid;
     const nextCoupon = couponPeriod(t.maturity, D(tLast.date)).next;
 
@@ -264,6 +276,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const got = dist.filter((d) => d.exDate > m.tradeDate && d.exDate <= mLast.date);
     const mCash = got.reduce((s, d) => s + d.amount * m.shares, 0);
     const mGain = mValue + mCash - mPaid;
+    const mFlows = [{date: D(m.tradeDate), amt: -mPaid}, ...got.map((d) => ({date: D(d.exDate), amt: d.amount * m.shares}))];
     const trailing = (date, price) => {
       const start = iso(new Date(D(date) - 365 * 864e5));
       return dist.filter((d) => d.exDate > start && d.exDate <= date).reduce((s, d) => s + d.amount, 0) / price;
@@ -284,8 +297,10 @@ Gain or loss  = worth if sold + distributions received − paid</div>
 
     // ---- Summary for the selected security ----
     const isT = !$("panel-treasury").hidden;
-    const S = isT ? {paid: tPaid, value: tValue, cash: tCash, gain: tGain, label: "Coupons received"}
-                  : {paid: mPaid, value: mValue, cash: mCash, gain: mGain, label: "Distributions received"};
+    const S = isT ? {paid: tPaid, value: tValue, cash: tCash, gain: tGain, label: "Coupons received",
+                     flows: [...tFlows, {date: nowSettle, amt: tValue}]}
+                  : {paid: mPaid, value: mValue, cash: mCash, gain: mGain, label: "Distributions received",
+                     flows: [...mFlows, {date: D(mLast.date), amt: mValue}]};
     const spec = (items) => items.map(([k, v, n]) => `<div><div class="k">${k}</div><div class="v">${v}</div>${n ? `<div class="n">${n}</div>` : ""}</div>`).join("");
     const cNext = couponPeriod(t.maturity, D(tLast.date)).next;
     const cDates = [cNext, addMonths(cNext, 6)].sort((a, b) => a.getUTCMonth() - b.getUTCMonth())
@@ -309,6 +324,9 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     $("s-cash").textContent = usd(S.cash);
     setGain("s-gain", S.gain);
     $("s-gainpct").textContent = `${pct(S.gain / S.paid, true)} of what we paid`;
+    const held = days(S.flows[0].date, S.flows[S.flows.length - 1].date);
+    $("s-ry").textContent = held < 1 ? "Realized yield: shown after the first day held"
+      : `Realized yield ${pct(realizedYield(S.flows))} a year · ${held} day${held === 1 ? "" : "s"} held`;
     $("asof").textContent = `Treasury price as of ${fmtDate(tLast.date)} · VMBS price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
