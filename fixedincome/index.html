@@ -71,6 +71,7 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rows .d .note{display:block;color:var(--muted);font-size:13px}
 .rows .d .num{white-space:nowrap}
 .rows .total{font-weight:600;border-top-color:var(--line)}
+.rows .total .note{font-weight:400}
 @media (max-width:700px){.rows{column-gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
 .card.accent{border-top:4px solid var(--c)}
@@ -150,7 +151,7 @@ footer a{color:inherit}
         <div class="y"><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
         <div class="d"><div>Coupons received<span class="note" id="t-cashnote"></span></div><div class="num" id="t-cash"></div></div>
         <div class="y"><div class="k">10-year Treasury yield today</div><div class="v num" id="t-ten"></div></div>
-        <div class="d total"><div>Gain or loss</div><div class="num" id="t-gain2"></div></div>
+        <div class="d total"><div>Gain or loss<span class="note">worth if sold + coupons received − paid</span></div><div class="num" id="t-gain2"></div></div>
       </div>
     </article>
     <details>
@@ -187,7 +188,7 @@ Gain or loss   = worth if sold + coupons received − paid</div>
         <div class="y"><div class="k">10-year Treasury yield today</div><div class="v num" id="m-ten"></div></div>
         <div class="d"><div>Distributions received<span class="note" id="m-cashnote"></span></div><div class="num" id="m-cash"></div></div>
         <div class="y"></div>
-        <div class="d total"><div>Gain or loss</div><div class="num" id="m-gain2"></div></div>
+        <div class="d total"><div>Gain or loss<span class="note">worth if sold + distributions received − paid</span></div><div class="num" id="m-gain2"></div></div>
       </div>
     </article>
     <details>
