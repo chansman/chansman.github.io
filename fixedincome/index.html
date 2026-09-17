@@ -62,14 +62,9 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .charts .chartbox{margin-top:auto;padding-top:10px}
 @media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}}
 .detailcard{margin-top:18px}
-.detailgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:12px 44px;align-items:stretch}
-.detailgrid .yields{margin-top:0;padding-top:0;border-top:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:stretch;gap:0 24px}
-.detailgrid .yields>div{border-top:1px solid var(--soft);padding:10px 0;display:flex;flex-direction:column;justify-content:center}
-.detailgrid .yields .v{font-size:24px}
-.detailgrid table{height:100%;font-size:16px}
-.detailgrid td{padding:10px 0;vertical-align:middle}
-.detailgrid td .note{font-size:13.5px}
-@media (max-width:900px){.detailgrid{grid-template-columns:minmax(0,1fr)}.detailgrid .yields{padding:0 0 4px}}
+.detailgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:12px 44px;align-items:start}
+.detailgrid .yields{margin-top:0;padding-top:4px;border-top:0;flex-direction:column;gap:14px}
+@media (max-width:900px){.detailgrid{grid-template-columns:minmax(0,1fr)}.detailgrid .yields{flex-direction:row;padding:0 0 12px;border-bottom:1px solid var(--line)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
 .card.accent{border-top:4px solid var(--c)}
 .card h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
