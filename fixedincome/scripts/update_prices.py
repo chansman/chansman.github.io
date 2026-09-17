@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch daily prices for the class fixed income portfolio.
+"""Fetch daily prices for the Treasury vs. MBS comparison page.
 
 Treasury note: end-of-day prices from TreasuryDirect's FedInvest price table.
 VMBS: daily closes and distributions from Yahoo Finance's chart feed.
@@ -27,7 +27,7 @@ TICKER = "VMBS"
 HISTORY_START = dt.date(2026, 9, 1)  # store some history before the purchase
 MAX_TREASURY_DAYS_PER_RUN = 40       # be polite to TreasuryDirect when backfilling
 
-UA = "Mozilla/5.0 (compatible; econ446-fixedincome/1.0; +https://chansman.github.io/fixedincome/)"
+UA = "Mozilla/5.0 (compatible; fixedincome-tracker/1.0; +https://chansman.github.io/fixedincome/)"
 FEDINVEST = "https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate"
 
 
