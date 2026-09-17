@@ -151,6 +151,7 @@ footer a{color:inherit}
     </article>
     <details>
       <summary>How these numbers are calculated</summary>
+      <p>At auction, Treasury sets the coupon at the winning (high) yield rounded down to the nearest ⅛ of a percent, so a new note sells at or slightly below $100.</p>
       <p>Treasury prices are quoted per $100 of face value. A buyer also pays the seller the interest that has built up since the last coupon (accrued interest), and gets it back in the next coupon.</p>
       <div class="eq">Worth if sold  = price/100 × face + accrued interest
 Accrued interest = (coupon/2 × face) × days since last coupon ÷ days in coupon period
@@ -330,9 +331,9 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       .map((d) => d.toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"})).join(" and ");
     $("spec").style.setProperty("--c", isT ? "var(--tsy)" : "var(--mbs)");
     $("spec").innerHTML = isT ? spec([
-      ["Issued", fmtDate(issue), "as a new 10-year note"],
+      ["Issued", fmtDate(issue), t.auctionDate ? `auctioned ${shortDate(t.auctionDate)} at ${t.auctionPrice.toFixed(2)}` : "as a new 10-year note"],
       ["Face value", usd(t.face).replace(".00", ""), "repaid at maturity"],
-      ["Coupon", `${t.coupon}% a year`, "set at the May 2026 auction".replace("May 2026", issueMonth)],
+      ["Coupon", `${t.coupon}% a year`, t.auctionHighYield ? `auction yield ${t.auctionHighYield.toFixed(3)}%` : `set at the ${issueMonth} auction`],
       ["Each coupon payment", usd(couponAmt), `every ${cDates}`],
       ["Matures", fmtDate(t.maturity), `${yearsLeft(tLast.date)} years left`],
     ]) : spec([
