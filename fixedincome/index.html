@@ -425,9 +425,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - B}" stroke="${muted}" stroke-dasharray="4 4"/>`;
       g += `<text x="${x - 6}" y="${T + 10}" text-anchor="end" font-size="12" fill="${muted}">bought</text>`;
     }
-    const before = pts.filter((p) => p.date <= o.buyDate), after = pts.filter((p) => p.date >= o.buyDate);
-    const line = (ps, op) => ps.length > 1 ? `<path d="${ps.map((p, i) => (i ? "L" : "M") + X(p.date).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${c}" stroke-opacity="${op}" stroke-width="2.5" stroke-linejoin="round"/>` : "";
-    g += line(before, 0.35) + line(after, 1);
+    if (pts.length > 1) g += `<path d="${pts.map((p, i) => (i ? "L" : "M") + X(p.date).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`;
     const lastPt = pts[pts.length - 1];
     g += `<circle cx="${X(lastPt.date)}" cy="${Y(lastPt.v)}" r="4" fill="${c}"/>`;
     g += `<line class="hair" y1="${T}" y2="${H - B}" stroke="${col("--ink2")}" visibility="hidden"/>`;

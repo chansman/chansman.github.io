@@ -25,8 +25,8 @@ PRICES = HERE / "data" / "prices.json"
 
 CUSIP = "91282CQQ7"
 TICKER = "VMBS"
-HISTORY_START = dt.date(2026, 9, 1)  # store some history before the purchase
-MAX_TREASURY_DAYS_PER_RUN = 40       # be polite to TreasuryDirect when backfilling
+HISTORY_START = dt.date(2026, 5, 15)  # issue date of the Treasury note, so charts start there
+MAX_TREASURY_DAYS_PER_RUN = 150      # enough to backfill from the issue date in one run
 
 UA = "Mozilla/5.0 (compatible; fixedincome-tracker/1.0; +https://chansman.github.io/fixedincome/)"
 FEDINVEST = "https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate"
