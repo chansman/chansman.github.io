@@ -1,0 +1,23 @@
+{
+ "placeholder": true,
+ "treasury": {
+  "name": "10-Year U.S. Treasury Note",
+  "cusip": "91282CQQ7",
+  "coupon": 4.375,
+  "maturity": "2036-05-15",
+  "face": 5000,
+  "tradeDate": "2026-09-16",
+  "settleDate": "2026-09-17",
+  "cleanPrice": 95.1875,
+  "accruedPaid": null,
+  "fees": 0
+ },
+ "vmbs": {
+  "name": "Vanguard Mortgage-Backed Securities ETF",
+  "ticker": "VMBS",
+  "tradeDate": "2026-09-17",
+  "shares": 110,
+  "price": 45.41,
+  "fees": 0
+ }
+}

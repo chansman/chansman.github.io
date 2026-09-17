@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Class Bond Portfolio · ECON 446</title>
+<meta name="description" content="Tracking a 10-year Treasury note and a mortgage-backed securities ETF bought for ECON 446 at Emory University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#f6f5f1; --card:#ffffff; --ink:#17191c; --ink2:#454b52; --muted:#6b727a;
+  --line:#e2e0da; --soft:#efede7;
+  --tsy:#1f5f99; --mbs:#b3542a;
+  --gain:#157a48; --loss:#b3261e;
+  --warn-bg:#fff4d6; --warn-ink:#6b4a00;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121417; --card:#1b1e22; --ink:#eceef0; --ink2:#c3c8ce; --muted:#939aa2;
+  --line:#2c3036; --soft:#23272c;
+  --tsy:#6aa8e0; --mbs:#e58a5c;
+  --gain:#4cc38a; --loss:#f07a70;
+  --warn-bg:#3a2f12; --warn-ink:#f3d58a;
+}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 48px}
+header h1{margin:0;font-size:30px;font-weight:600;letter-spacing:-.02em}
+header p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.banner{margin:18px 0 0;padding:10px 14px;border-radius:8px;background:var(--warn-bg);color:var(--warn-ink);font-size:15px}
+
+.summary{margin:26px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.summary div{background:var(--card);padding:14px 18px}
+.summary .k{font-size:13px;color:var(--muted)}
+.summary .v{font-size:24px;font-weight:500;margin-top:2px}
+@media (max-width:760px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:860px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;border-top:4px solid var(--c)}
+.card.tsy{--c:var(--tsy)} .card.mbs{--c:var(--mbs)}
+.card h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
+.card .sub{margin:2px 0 14px;color:var(--muted);font-size:14px}
+.big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.big .v{font-size:34px;font-weight:500;letter-spacing:-.02em}
+.big .k{font-size:14px;color:var(--muted)}
+.gain{color:var(--gain)} .loss{color:var(--loss)}
+
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:7px 0;border-top:1px solid var(--soft);vertical-align:top}
+td:last-child{text-align:right;white-space:nowrap}
+td .note{display:block;color:var(--muted);font-size:13px}
+tr.total td{border-top:1px solid var(--line);font-weight:600}
+
+.yields{display:flex;gap:26px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.yields .k{font-size:13px;color:var(--muted)}
+.yields .v{font-size:20px;font-weight:500}
+
+.chartcard{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
+.charthead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.charthead h3{margin:0;font-size:17px;font-weight:600}
+.legend{display:flex;gap:16px;font-size:14px;color:var(--ink2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.chartbox{position:relative;margin-top:10px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
+
+details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 22px}
+summary{cursor:pointer;font-weight:600}
+details .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:10px;font-size:15px;color:var(--ink2)}
+@media (max-width:860px){details .grid{grid-template-columns:minmax(0,1fr)}}
+details h4{margin:8px 0 4px;color:var(--ink);font-size:15px}
+.eq{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px;background:var(--soft);border-radius:6px;padding:8px 10px;margin:6px 0;overflow-x:auto;white-space:pre}
+footer{margin-top:22px;color:var(--muted);font-size:13px}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Class Bond Portfolio</h1>
+    <p>ECON 446: Housing and Mortgage Markets · Emory University · <span id="asof">loading prices…</span></p>
+    <div class="banner" id="placeholder" hidden>The purchase details below are placeholders until the actual trades are made.</div>
+  </header>
+
+  <section class="summary" aria-label="Portfolio summary">
+    <div><div class="k">Paid</div><div class="v num" id="s-paid">–</div></div>
+    <div><div class="k">Worth if sold today</div><div class="v num" id="s-value">–</div></div>
+    <div><div class="k">Cash received</div><div class="v num" id="s-cash">–</div></div>
+    <div><div class="k">Gain or loss</div><div class="v num" id="s-gain">–</div></div>
+  </section>
+
+  <section class="cards">
+    <article class="card tsy">
+      <h2 id="t-name">10-Year U.S. Treasury Note</h2>
+      <div class="sub" id="t-sub"></div>
+      <div class="big"><span class="v num" id="t-gain">–</span><span class="k" id="t-gainpct"></span></div>
+      <table>
+        <tr><td>Paid<span class="note" id="t-paidnote"></span></td><td class="num" id="t-paid"></td></tr>
+        <tr><td>Worth if sold today<span class="note" id="t-valnote"></span></td><td class="num" id="t-value"></td></tr>
+        <tr><td>Coupons received<span class="note" id="t-cashnote"></span></td><td class="num" id="t-cash"></td></tr>
+        <tr class="total"><td>Gain or loss</td><td class="num" id="t-gain2"></td></tr>
+      </table>
+      <div class="yields">
+        <div><div class="k">Yield to maturity today</div><div class="v num" id="t-ytm"></div></div>
+        <div><div class="k">When we bought</div><div class="v num" id="t-ytm0"></div></div>
+        <div><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
+      </div>
+    </article>
+
+    <article class="card mbs">
+      <h2 id="m-name">Vanguard Mortgage-Backed Securities ETF</h2>
+      <div class="sub" id="m-sub"></div>
+      <div class="big"><span class="v num" id="m-gain">–</span><span class="k" id="m-gainpct"></span></div>
+      <table>
+        <tr><td>Paid<span class="note" id="m-paidnote"></span></td><td class="num" id="m-paid"></td></tr>
+        <tr><td>Worth if sold today<span class="note" id="m-valnote"></span></td><td class="num" id="m-value"></td></tr>
+        <tr><td>Distributions received<span class="note" id="m-cashnote"></span></td><td class="num" id="m-cash"></td></tr>
+        <tr class="total"><td>Gain or loss</td><td class="num" id="m-gain2"></td></tr>
+      </table>
+      <div class="yields">
+        <div><div class="k">12-month distribution yield</div><div class="v num" id="m-dy"></div></div>
+        <div><div class="k">When we bought</div><div class="v num" id="m-dy0"></div></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="chartcard">
+    <div class="charthead">
+      <h3>Price change since we bought</h3>
+      <div class="legend"><span><i style="background:var(--tsy)"></i>Treasury note</span><span><i style="background:var(--mbs)"></i>VMBS</span></div>
+    </div>
+    <div class="chartbox" id="chartbox"><svg id="chart" viewBox="0 0 1100 300" role="img" aria-label="Percent change in price for each security"></svg><div class="tip" id="tip" hidden></div></div>
+  </section>
+
+  <details>
+    <summary>How these numbers are calculated</summary>
+    <div class="grid">
+      <div>
+        <h4>Treasury note</h4>
+        Prices are quoted per $100 of face value. A buyer also pays the seller the interest that has built up since the last coupon (accrued interest), and gets it back in the next coupon.
+        <div class="eq">Worth if sold = price/100 × face + accrued interest
+Accrued interest = (coupon/2 × face) × days since last coupon
+                                      ÷ days in coupon period
+Gain or loss = worth if sold + coupons received − paid</div>
+        The yield to maturity is the rate y that makes the present value of the remaining coupons and the $100 repayment equal to the price plus accrued interest, discounting every six months at y/2.
+      </div>
+      <div>
+        <h4>VMBS</h4>
+        VMBS is a fund that holds thousands of agency mortgage pools. It has no maturity date: as homeowners pay down and prepay their mortgages, the fund buys new pools, so its price never converges to a fixed repayment.
+        <div class="eq">Worth if sold = shares × price
+Gain or loss = worth if sold + distributions received − paid</div>
+        The 12-month distribution yield is the total paid per share over the last year divided by today's price. A distribution counts toward our cash once we own the shares before its ex-dividend date.
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    Treasury prices: end-of-day prices from <a href="https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate">TreasuryDirect FedInvest</a>. VMBS prices and distributions: <a href="https://finance.yahoo.com/quote/VMBS/">Yahoo Finance</a>. Updated once a day after the market closes. Taxes and trading costs are ignored. <span id="updated"></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const usd = (x, sign) => (sign && x > 0 ? "+" : x < 0 ? "−" : "") + "$" + Math.abs(x).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const pct = (x, sign) => (sign && x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x * 100).toFixed(2) + "%";
+  const D = (s) => new Date(s + "T00:00:00Z");
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const days = (a, b) => Math.round((b - a) / 864e5);
+  const fmtDate = (s) => D(s).toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric", timeZone: "UTC"});
+  const addMonths = (d, m) => { const x = new Date(d); x.setUTCMonth(x.getUTCMonth() + m); return x; };
+  const nextBusinessDay = (d) => { const x = new Date(d); do { x.setUTCDate(x.getUTCDate() + 1); } while ([0, 6].includes(x.getUTCDay())); return x; };
+  const tone = (el, x) => { el.classList.toggle("gain", x > 0); el.classList.toggle("loss", x < 0); };
+
+  // Treasury coupon schedule and accrued interest
+  function couponPeriod(maturity, date) {
+    let next = D(maturity);
+    while (addMonths(next, -6) > date) next = addMonths(next, -6);
+    return {prev: addMonths(next, -6), next};
+  }
+  function accrued(t, settle) {
+    const {prev, next} = couponPeriod(t.maturity, settle);
+    return t.face * t.coupon / 100 / 2 * days(prev, settle) / days(prev, next);
+  }
+  function ytm(t, clean, settle) {
+    const {prev, next} = couponPeriod(t.maturity, settle);
+    const w = days(settle, next) / days(prev, next);
+    let n = 0; for (let d = next; d <= D(t.maturity); d = addMonths(d, 6)) n++;
+    const dirty = clean + accrued({...t, face: 100}, settle);
+    const c = t.coupon / 2;
+    const pv = (y) => { let s = 0; for (let k = 0; k < n; k++) s += c / Math.pow(1 + y / 2, k + w); return s + 100 / Math.pow(1 + y / 2, n - 1 + w); };
+    let lo = -0.05, hi = 0.5;
+    for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (pv(m) > dirty) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+
+  function lastOnOrBefore(list, date) {
+    let out = null;
+    for (const p of list) if (p.date <= date) out = p;
+    return out;
+  }
+
+  function render(trade, px) {
+    $("placeholder").hidden = !trade.placeholder;
+
+    // ---- Treasury ----
+    const t = trade.treasury;
+    const tp = px.treasury.prices;
+    const tLast = tp[tp.length - 1];
+    const tSettle = D(t.settleDate);
+    const aiPaid = t.accruedPaid != null ? t.accruedPaid : accrued(t, tSettle);
+    const tPaid = t.cleanPrice / 100 * t.face + aiPaid + (t.fees || 0);
+    const nowSettle = nextBusinessDay(D(tLast.date));
+    const aiNow = accrued(t, nowSettle);
+    const tValue = tLast.eod / 100 * t.face + aiNow;
+    const couponAmt = t.face * t.coupon / 100 / 2;
+    let tCash = 0, received = 0;
+    for (let d = couponPeriod(t.maturity, tSettle).next; d <= D(tLast.date); d = addMonths(d, 6)) { tCash += couponAmt; received++; }
+    const tGain = tValue + tCash - tPaid;
+    const nextCoupon = couponPeriod(t.maturity, D(tLast.date)).next;
+
+    $("t-name").textContent = t.name;
+    $("t-sub").textContent = `${t.coupon}% coupon · matures ${fmtDate(t.maturity)} · $${t.face.toLocaleString()} face · CUSIP ${t.cusip}`;
+    $("t-paidnote").textContent = `${fmtDate(t.tradeDate)}: price ${t.cleanPrice.toFixed(4)} per $100, plus ${usd(aiPaid)} accrued interest`;
+    $("t-paid").textContent = usd(tPaid);
+    $("t-valnote").textContent = `${fmtDate(tLast.date)} close: price ${tLast.eod.toFixed(4)} per $100, plus ${usd(aiNow)} accrued interest`;
+    $("t-value").textContent = usd(tValue);
+    $("t-cashnote").textContent = `${received} so far · next: ${usd(couponAmt)} on ${fmtDate(iso(nextCoupon))}`;
+    $("t-cash").textContent = usd(tCash);
+    $("t-gain").textContent = usd(tGain, true); tone($("t-gain"), tGain);
+    $("t-gain2").textContent = usd(tGain, true); tone($("t-gain2"), tGain);
+    $("t-gainpct").textContent = `${pct(tGain / tPaid, true)} if sold today`;
+    $("t-ytm").textContent = pct(ytm(t, tLast.eod, nowSettle));
+    $("t-ytm0").textContent = pct(ytm(t, t.cleanPrice, tSettle));
+    $("t-cy").textContent = pct(t.coupon / tLast.eod);
+
+    // ---- VMBS ----
+    const m = trade.vmbs;
+    const mp = px.vmbs.prices;
+    const mLast = mp[mp.length - 1];
+    const dist = px.vmbs.distributions;
+    const mPaid = m.shares * m.price + (m.fees || 0);
+    const mValue = m.shares * mLast.close;
+    const got = dist.filter((d) => d.exDate > m.tradeDate && d.exDate <= mLast.date);
+    const mCash = got.reduce((s, d) => s + d.amount * m.shares, 0);
+    const mGain = mValue + mCash - mPaid;
+    const trailing = (date, price) => {
+      const start = iso(new Date(D(date) - 365 * 864e5));
+      return dist.filter((d) => d.exDate > start && d.exDate <= date).reduce((s, d) => s + d.amount, 0) / price;
+    };
+    const lastDist = dist[dist.length - 1];
+
+    $("m-name").textContent = `${m.name} (${m.ticker})`;
+    $("m-sub").textContent = `Agency mortgage-backed securities fund · ${m.shares} shares · distributions paid monthly`;
+    $("m-paidnote").textContent = `${fmtDate(m.tradeDate)}: ${m.shares} shares at $${m.price.toFixed(2)}`;
+    $("m-paid").textContent = usd(mPaid);
+    $("m-valnote").textContent = `${fmtDate(mLast.date)} close: $${mLast.close.toFixed(2)} per share`;
+    $("m-value").textContent = usd(mValue);
+    $("m-cashnote").textContent = `${got.length} so far · last: $${lastDist.amount.toFixed(3)} per share, ex-date ${fmtDate(lastDist.exDate)}`;
+    $("m-cash").textContent = usd(mCash);
+    $("m-gain").textContent = usd(mGain, true); tone($("m-gain"), mGain);
+    $("m-gain2").textContent = usd(mGain, true); tone($("m-gain2"), mGain);
+    $("m-gainpct").textContent = `${pct(mGain / mPaid, true)} if sold today`;
+    $("m-dy").textContent = pct(trailing(mLast.date, mLast.close));
+    $("m-dy0").textContent = pct(trailing(m.tradeDate, m.price));
+
+    // ---- Summary ----
+    const paid = tPaid + mPaid, value = tValue + mValue, cash = tCash + mCash, gain = tGain + mGain;
+    $("s-paid").textContent = usd(paid);
+    $("s-value").textContent = usd(value);
+    $("s-cash").textContent = usd(cash);
+    $("s-gain").textContent = `${usd(gain, true)}`; tone($("s-gain"), gain);
+    $("asof").textContent = `Treasury price as of ${fmtDate(tLast.date)} · VMBS price as of ${fmtDate(mLast.date)}`;
+    if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
+
+    drawChart(
+      tp.map((p) => ({date: p.date, v: p.eod / t.cleanPrice - 1})),
+      mp.map((p) => ({date: p.date, v: p.close / m.price - 1})),
+      t.tradeDate
+    );
+  }
+
+  function drawChart(tsy, mbs, tradeDate) {
+    const svg = $("chart"), W = Math.max(320, Math.round($("chartbox").clientWidth || 1100)), H = W < 700 ? 240 : 300, L = 58, R = 12, T = 14, B = 34;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const all = [...tsy, ...mbs];
+    const dates = [...new Set(all.map((p) => p.date))].sort();
+    const x0 = D(dates[0]), x1 = D(dates[dates.length - 1]);
+    const span = Math.max(1, x1 - x0);
+    const X = (s) => L + (D(s) - x0) / span * (W - L - R);
+    let lo = Math.min(0, ...all.map((p) => p.v)), hi = Math.max(0, ...all.map((p) => p.v));
+    const pad = Math.max(0.002, (hi - lo) * 0.12); lo -= pad; hi += pad;
+    const Y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+    const css = getComputedStyle(document.documentElement);
+    const col = (n) => css.getPropertyValue(n).trim();
+    const step = (hi - lo) > 0.04 ? 0.01 : (hi - lo) > 0.016 ? 0.005 : 0.002;
+    let g = "";
+    for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+      const y = Y(v).toFixed(1), zero = Math.abs(v) < 1e-9;
+      g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${col(zero ? "--muted" : "--soft")}" stroke-width="${zero ? 1.2 : 1}"/>`;
+      g += `<text x="${L - 8}" y="${+y + 4}" text-anchor="end" font-size="12" fill="${col("--muted")}" font-family="IBM Plex Mono, monospace">${(v * 100).toFixed(1)}%</text>`;
+    }
+    let lastLabel = -1e9;
+    for (const s of dates) {
+      if (X(s) - lastLabel < 70 || X(s) > W - R - 24) continue;
+      lastLabel = X(s);
+      g += `<text x="${X(s)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="${col("--muted")}">${D(s).toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"})}</text>`;
+    }
+    if (tradeDate >= dates[0] && tradeDate <= dates[dates.length - 1]) {
+      const x = X(tradeDate);
+      g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - B}" stroke="${col("--muted")}" stroke-dasharray="4 4"/>`;
+      g += `<text x="${x - 6}" y="${T + 12}" text-anchor="end" font-size="12" fill="${col("--muted")}">bought</text>`;
+    }
+    const line = (pts, c, op) => pts.length > 1 ? `<path d="${pts.map((p, i) => (i ? "L" : "M") + X(p.date).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${col(c)}" stroke-opacity="${op}" stroke-width="2.5" stroke-linejoin="round"/>` : "";
+    const dot = (pts, c) => pts.length === 1 ? `<circle cx="${X(pts[0].date)}" cy="${Y(pts[0].v)}" r="4" fill="${col(c)}"/>` : "";
+    for (const [pts, c] of [[tsy, "--tsy"], [mbs, "--mbs"]]) {
+      const before = pts.filter((p) => p.date <= tradeDate), after = pts.filter((p) => p.date >= tradeDate);
+      g += line(before, c, 0.35) + line(after, c, 1) + dot(after, c);
+    }
+    g += `<line id="hair" y1="${T}" y2="${H - B}" stroke="${col("--ink2")}" stroke-width="1" visibility="hidden"/>`;
+    svg.innerHTML = g;
+
+    const box = $("chartbox"), tip = $("tip"), hair = svg.querySelector("#hair");
+    svg.onmousemove = (e) => {
+      const r = svg.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width * W;
+      let best = dates[0];
+      for (const s of dates) if (Math.abs(X(s) - px) < Math.abs(X(best) - px)) best = s;
+      const tv = tsy.find((p) => p.date === best), mv = mbs.find((p) => p.date === best);
+      hair.setAttribute("x1", X(best)); hair.setAttribute("x2", X(best)); hair.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${fmtDate(best)}</b><br><span style="color:var(--tsy)">Treasury</span> ${tv ? pct(tv.v, true) : "–"}<br><span style="color:var(--mbs)">VMBS</span> ${mv ? pct(mv.v, true) : "–"}`;
+      tip.hidden = false;
+      const left = X(best) / W * r.width;
+      tip.style.left = Math.min(r.width - tip.offsetWidth, Math.max(0, left + 12)) + "px";
+      tip.style.top = "8px";
+    };
+    svg.onmouseleave = () => { tip.hidden = true; hair.setAttribute("visibility", "hidden"); };
+  }
+
+  const bust = "?t=" + Math.floor(Date.now() / 6e5);
+  Promise.all([fetch("trade.json" + bust).then((r) => r.json()), fetch("data/prices.json" + bust).then((r) => r.json())])
+    .then(([trade, px]) => {
+      render(trade, px);
+      matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render(trade, px));
+      let timer; addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => render(trade, px), 150); });
+    })
+    .catch((err) => { $("asof").textContent = "prices could not be loaded"; console.error(err); });
+})();
+</script>
+</body>
+</html>
