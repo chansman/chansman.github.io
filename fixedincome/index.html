@@ -360,6 +360,10 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     // ---- Charts for the visible tab: price and the 10-year yield, on the same dates ----
     const ratePts = ((px.rates && px.rates.tenYear) || []).map((r) => ({date: r.date, v: r.rate / 100}));
     const pricePts = isT ? tp.map((p) => ({date: p.date, v: p.eod})) : mp.map((p) => ({date: p.date, v: p.close}));
+    if (isT && t.auctionDate && t.auctionPrice && pricePts.length && t.auctionDate < pricePts[0].date) {
+      pricePts.unshift({date: t.auctionDate, v: t.auctionPrice, note: "auction price"});
+    }
+    const markers = isT && t.auctionDate ? [{date: t.auctionDate, label: "auctioned"}] : [];
     const buyDate = isT ? t.tradeDate : m.tradeDate, buyPrice = isT ? t.cleanPrice : m.price;
     const allDates = [...new Set([...pricePts, ...ratePts].map((p) => p.date))].sort();
     const buyRate = [...ratePts].reverse().find((p) => p.date <= buyDate);
@@ -368,13 +372,15 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       key: isT ? "t" : "m", pts: pricePts, color: isT ? "--tsy" : "--mbs", dates: allDates, buyDate,
       ref: buyPrice, refLabel: `our price ${isT ? buyPrice.toFixed(4) : "$" + buyPrice.toFixed(2)}`,
       axisFmt: isT ? (v) => v.toFixed(2) : (v) => "$" + v.toFixed(2),
-      tipFmt: (p) => `${isT ? p.v.toFixed(4) : "$" + p.v.toFixed(2)} ${muted(`(${pct(p.v / buyPrice - 1, true)} vs. our price)`)}`,
+      tipFmt: (p) => `${isT ? p.v.toFixed(4) : "$" + p.v.toFixed(2)} ${muted(p.note ? `(${p.note})` : `(${pct(p.v / buyPrice - 1, true)} vs. our price)`)}`,
+      markers,
     });
     const rateChart = drawChart({
       key: isT ? "ty" : "my", pts: ratePts, color: "--ink2", dates: allDates, buyDate,
       ref: buyRate ? buyRate.v : null, refLabel: buyRate ? `when we bought ${pct(buyRate.v)}` : "",
       axisFmt: (v) => (v * 100).toFixed(2) + "%",
       tipFmt: (p) => `${pct(p.v)}${buyRate ? " " + muted(`(${p.v >= buyRate.v ? "+" : "−"}${Math.abs((p.v - buyRate.v) * 100).toFixed(2)} pts)`) : ""}`,
+      markers,
     });
     linkCharts([priceChart, rateChart]);
   }
@@ -417,14 +423,21 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       lastLabel = X(d);
       g += `<text x="${X(d)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="${muted}">${shortDate(d)}</text>`;
     }
+    const halo = `paint-order="stroke" stroke="${col("--card")}" stroke-width="4" stroke-linejoin="round"`;
     if (o.ref != null) {
       g += `<line x1="${L}" x2="${W - R}" y1="${Y(o.ref)}" y2="${Y(o.ref)}" stroke="${muted}" stroke-dasharray="4 4"/>`;
-      g += `<text x="${L + 6}" y="${Y(o.ref) - 6}" font-size="12" fill="${muted}">${o.refLabel}</text>`;
+      g += `<text x="${L + (W - L - R) * 0.5}" y="${Y(o.ref) - 6}" text-anchor="middle" font-size="12" fill="${muted}" ${halo}>${o.refLabel}</text>`;
+    }
+    for (const mk of o.markers || []) {
+      if (mk.date < o.dates[0] || mk.date > o.dates[o.dates.length - 1]) continue;
+      const x = X(mk.date);
+      g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - B}" stroke="${muted}" stroke-dasharray="1.5 3"/>`;
+      g += `<text x="${x + 6}" y="${T + 10}" font-size="12" fill="${muted}" ${halo}>${mk.label}</text>`;
     }
     if (o.buyDate >= o.dates[0] && o.buyDate <= o.dates[o.dates.length - 1]) {
       const x = X(o.buyDate);
       g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - B}" stroke="${muted}" stroke-dasharray="4 4"/>`;
-      g += `<text x="${x - 6}" y="${T + 10}" text-anchor="end" font-size="12" fill="${muted}">bought</text>`;
+      g += `<text x="${x - 6}" y="${T + 10}" text-anchor="end" font-size="12" fill="${muted}" ${halo}>bought</text>`;
     }
     if (pts.length > 1) g += `<path d="${pts.map((p, i) => (i ? "L" : "M") + X(p.date).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`;
     const lastPt = pts[pts.length - 1];
@@ -438,8 +451,8 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       svg, W,
       nearestDate(clientX) {
         const r = svg.getBoundingClientRect(), mx = (clientX - r.left) / r.width * W;
-        let best = o.dates[0];
-        for (const d of o.dates) if (Math.abs(X(d) - mx) < Math.abs(X(best) - mx)) best = d;
+        let best = pts[0].date;
+        for (const q of pts) if (Math.abs(X(q.date) - mx) < Math.abs(X(best) - mx)) best = q.date;
         return best;
       },
       show(date) {
