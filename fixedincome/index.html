@@ -323,10 +323,10 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     $("s-cashlabel").textContent = S.label;
     $("s-cash").textContent = usd(S.cash);
     setGain("s-gain", S.gain);
-    $("s-gainpct").textContent = `${pct(S.gain / S.paid, true)} of what we paid`;
+    $("s-gainpct").textContent = `Percentage gain: ${pct(S.gain / S.paid, true)}`;
     const held = days(S.flows[0].date, S.flows[S.flows.length - 1].date);
-    $("s-ry").textContent = held < 1 ? "Realized yield: shown after the first day held"
-      : `Realized yield ${pct(realizedYield(S.flows))} a year · ${held} day${held === 1 ? "" : "s"} held`;
+    $("s-ry").textContent = held < 1 ? `Realized yield: ${pct(0)}`
+      : `Realized yield: ${pct(realizedYield(S.flows))} a year · ${held} day${held === 1 ? "" : "s"} held`;
     $("asof").textContent = `Treasury price as of ${fmtDate(tLast.date)} · VMBS price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
