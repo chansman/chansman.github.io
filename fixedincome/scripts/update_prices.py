@@ -3,6 +3,7 @@
 
 Treasury note: end-of-day prices from TreasuryDirect's FedInvest price table.
 VMBS: daily closes and distributions from Yahoo Finance's chart feed.
+10-year Treasury yield: the Treasury's daily par yield curve.
 
 Results are merged into data/prices.json. Standard library only, so the
 GitHub Action needs no installs.
@@ -70,6 +71,8 @@ def fedinvest_prices(day):
              for c in re.findall(r"<td[^>]*>(.*?)</td>", row.group(1), re.S)]
     # cells after CUSIP: type, rate, maturity, call date, buy, sell, end of day
     buy, sell, eod = (float(x) for x in cells[4:7])
+    if eod <= 0:
+        return None  # end-of-day price not posted yet; try again next run
     return {"buy": buy, "sell": sell, "eod": eod}
 
 
@@ -139,12 +142,37 @@ def update_vmbs(data):
         key=lambda d: d["exDate"])
 
 
+def update_rates(data):
+    rates = {r["date"]: r for r in data.get("rates", {}).get("tenYear", [])}
+    for year in range(HISTORY_START.year, dt.date.today().year + 1):
+        url = ("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/"
+               "daily-treasury-rates.csv/%d/all?type=daily_treasury_yield_curve"
+               "&field_tdr_date_value=%d&page&_format=csv" % (year, year))
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            lines = urllib.request.urlopen(req, timeout=60).read().decode("utf-8-sig").splitlines()
+        except Exception as err:
+            print(f"Treasury yield curve {year}: {err}", file=sys.stderr)
+            continue
+        header = [h.strip('"') for h in lines[0].split(",")]
+        col = header.index("10 Yr")
+        for line in lines[1:]:
+            cells = line.split(",")
+            if len(cells) <= col or not cells[col]:
+                continue
+            day = dt.datetime.strptime(cells[0], "%m/%d/%Y").date()
+            if day >= HISTORY_START:
+                rates[day.isoformat()] = {"date": day.isoformat(), "rate": float(cells[col])}
+    data["rates"] = {"tenYear": sorted(rates.values(), key=lambda r: r["date"])}
+
+
 def main():
     data = load()
     before = json.dumps(data, sort_keys=True)
     today = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4))).date()
     update_treasury(data, today)
     update_vmbs(data)
+    update_rates(data)
     if json.dumps(data, sort_keys=True) != before:
         data["updated"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
         PRICES.write_text(json.dumps(data, indent=1) + "\n")

@@ -57,8 +57,14 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .tabs .sw{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:8px;vertical-align:1px}
 
 .panel{--c:var(--tsy)} .panel.mbs{--c:var(--mbs)}
-.panelgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
-@media (max-width:900px){.panelgrid{grid-template-columns:minmax(0,1fr)}}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.charts .card{display:flex;flex-direction:column}
+.charts .chartbox{margin-top:auto;padding-top:10px}
+@media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}}
+.detailcard{margin-top:18px}
+.detailgrid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px 44px;align-items:start}
+.detailgrid .yields{margin-top:0;padding-top:0;border-top:0;flex-direction:column;gap:14px}
+@media (max-width:900px){.detailgrid{grid-template-columns:minmax(0,1fr)}.detailgrid .yields{flex-direction:row;padding-top:12px;border-top:1px solid var(--line)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
 .card.accent{border-top:4px solid var(--c)}
 .card h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
@@ -116,10 +122,20 @@ footer a{color:inherit}
 
   <!-- Treasury -->
   <section class="panel" role="tabpanel" id="panel-treasury" aria-labelledby="tab-treasury">
-    <div class="panelgrid">
-      <article class="card accent">
-        <h2 id="t-name">10-Year U.S. Treasury Note</h2>
-        <div class="sub" id="t-sub"></div>
+    <div class="charts">
+      <article class="card">
+        <div class="charthead"><h3>Price per $100 of face value</h3><p>End-of-day price. Dashed lines mark when we bought and the price we paid.</p></div>
+        <div class="chartbox" id="t-box"><svg id="t-chart" role="img" aria-label="Treasury note price history"></svg><div class="tip" id="t-tip" hidden></div></div>
+      </article>
+      <article class="card">
+        <div class="charthead"><h3>10-year Treasury yield</h3><p>Daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="chartbox" id="ty-box"><svg id="ty-chart" role="img" aria-label="10-year Treasury yield history"></svg><div class="tip" id="ty-tip" hidden></div></div>
+      </article>
+    </div>
+    <article class="card accent detailcard">
+      <h2 id="t-name">10-Year U.S. Treasury Note</h2>
+      <div class="sub" id="t-sub"></div>
+      <div class="detailgrid">
         <table>
           <tr><td>Paid<span class="note" id="t-paidnote"></span></td><td class="num" id="t-paid"></td></tr>
           <tr><td>Worth if sold today<span class="note" id="t-valnote"></span></td><td class="num" id="t-value"></td></tr>
@@ -131,12 +147,8 @@ footer a{color:inherit}
           <div><div class="k">When we bought</div><div class="v num" id="t-ytm0"></div></div>
           <div><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
         </div>
-      </article>
-      <article class="card">
-        <div class="charthead"><h3>Price per $100 of face value</h3><p>End-of-day price. Dashed lines mark when we bought and the price we paid.</p></div>
-        <div class="chartbox" id="t-box"><svg id="t-chart" role="img" aria-label="Treasury note price history"></svg><div class="tip" id="t-tip" hidden></div></div>
-      </article>
-    </div>
+      </div>
+    </article>
     <details>
       <summary>How these numbers are calculated</summary>
       <p>Treasury prices are quoted per $100 of face value. A buyer also pays the seller the interest that has built up since the last coupon (accrued interest), and gets it back in the next coupon.</p>
@@ -149,10 +161,20 @@ Gain or loss   = worth if sold + coupons received − paid</div>
 
   <!-- VMBS -->
   <section class="panel mbs" role="tabpanel" id="panel-vmbs" aria-labelledby="tab-vmbs" hidden>
-    <div class="panelgrid">
-      <article class="card accent">
-        <h2 id="m-name">Vanguard Mortgage-Backed Securities ETF</h2>
-        <div class="sub" id="m-sub"></div>
+    <div class="charts">
+      <article class="card">
+        <div class="charthead"><h3>Price per share</h3><p>Closing price. Dashed lines mark when we bought and the price we paid.</p></div>
+        <div class="chartbox" id="m-box"><svg id="m-chart" role="img" aria-label="VMBS price history"></svg><div class="tip" id="m-tip" hidden></div></div>
+      </article>
+      <article class="card">
+        <div class="charthead"><h3>10-year Treasury yield</h3><p>Daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="chartbox" id="my-box"><svg id="my-chart" role="img" aria-label="10-year Treasury yield history"></svg><div class="tip" id="my-tip" hidden></div></div>
+      </article>
+    </div>
+    <article class="card accent detailcard">
+      <h2 id="m-name">Vanguard Mortgage-Backed Securities ETF</h2>
+      <div class="sub" id="m-sub"></div>
+      <div class="detailgrid">
         <table>
           <tr><td>Paid<span class="note" id="m-paidnote"></span></td><td class="num" id="m-paid"></td></tr>
           <tr><td>Worth if sold today<span class="note" id="m-valnote"></span></td><td class="num" id="m-value"></td></tr>
@@ -163,12 +185,8 @@ Gain or loss   = worth if sold + coupons received − paid</div>
           <div><div class="k">12-month distribution yield</div><div class="v num" id="m-dy"></div></div>
           <div><div class="k">When we bought</div><div class="v num" id="m-dy0"></div></div>
         </div>
-      </article>
-      <article class="card">
-        <div class="charthead"><h3>Price per share</h3><p>Closing price. Dashed lines mark when we bought and the price we paid.</p></div>
-        <div class="chartbox" id="m-box"><svg id="m-chart" role="img" aria-label="VMBS price history"></svg><div class="tip" id="m-tip" hidden></div></div>
-      </article>
-    </div>
+      </div>
+    </article>
     <details>
       <summary>How these numbers are calculated</summary>
       <p>VMBS is a fund that holds agency mortgage pools. It has no maturity date: as homeowners pay down and prepay their mortgages, the fund buys new pools, so its price never converges to a fixed repayment.</p>
@@ -179,7 +197,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
   </section>
 
   <footer>
-    Treasury prices: end-of-day prices from <a href="https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate">TreasuryDirect FedInvest</a>. VMBS prices and distributions: <a href="https://finance.yahoo.com/quote/VMBS/">Yahoo Finance</a>. Updated once a day after the market closes. Taxes and trading costs are ignored. <span id="updated"></span>
+    Treasury prices: end-of-day prices from <a href="https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate">TreasuryDirect FedInvest</a>. VMBS prices and distributions: <a href="https://finance.yahoo.com/quote/VMBS/">Yahoo Finance</a>. 10-year yield: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve">U.S. Treasury daily par yield curve</a>. Updated once a day after the market closes. Taxes and trading costs are ignored. <span id="updated"></span>
   </footer>
 </div>
 
@@ -331,12 +349,26 @@ Gain or loss  = worth if sold + distributions received − paid</div>
                                 : `Purchased ${fmtDate(m.tradeDate)} · Price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
-    // ---- Chart for the visible tab ----
-    if (!$("panel-treasury").hidden) {
-      drawChart("t", tp.map((p) => ({date: p.date, v: p.eod})), "--tsy", t.tradeDate, t.cleanPrice, (v) => v.toFixed(2), (v) => v.toFixed(4));
-    } else {
-      drawChart("m", mp.map((p) => ({date: p.date, v: p.close})), "--mbs", m.tradeDate, m.price, (v) => "$" + v.toFixed(2), (v) => "$" + v.toFixed(2));
-    }
+    // ---- Charts for the visible tab: price and the 10-year yield, on the same dates ----
+    const ratePts = ((px.rates && px.rates.tenYear) || []).map((r) => ({date: r.date, v: r.rate / 100}));
+    const pricePts = isT ? tp.map((p) => ({date: p.date, v: p.eod})) : mp.map((p) => ({date: p.date, v: p.close}));
+    const buyDate = isT ? t.tradeDate : m.tradeDate, buyPrice = isT ? t.cleanPrice : m.price;
+    const allDates = [...new Set([...pricePts, ...ratePts].map((p) => p.date))].sort();
+    const buyRate = [...ratePts].reverse().find((p) => p.date <= buyDate);
+    const muted = (x) => `<span style="color:var(--muted)">${x}</span>`;
+    const priceChart = drawChart({
+      key: isT ? "t" : "m", pts: pricePts, color: isT ? "--tsy" : "--mbs", dates: allDates, buyDate,
+      ref: buyPrice, refLabel: `our price ${isT ? buyPrice.toFixed(4) : "$" + buyPrice.toFixed(2)}`,
+      axisFmt: isT ? (v) => v.toFixed(2) : (v) => "$" + v.toFixed(2),
+      tipFmt: (p) => `${isT ? p.v.toFixed(4) : "$" + p.v.toFixed(2)} ${muted(`(${pct(p.v / buyPrice - 1, true)} vs. our price)`)}`,
+    });
+    const rateChart = drawChart({
+      key: isT ? "ty" : "my", pts: ratePts, color: "--ink2", dates: allDates, buyDate,
+      ref: buyRate ? buyRate.v : null, refLabel: buyRate ? `when we bought ${pct(buyRate.v)}` : "",
+      axisFmt: (v) => (v * 100).toFixed(2) + "%",
+      tipFmt: (p) => `${pct(p.v)}${buyRate ? " " + muted(`(${p.v >= buyRate.v ? "+" : "−"}${Math.abs((p.v - buyRate.v) * 100).toFixed(2)} pts)`) : ""}`,
+    });
+    linkCharts([priceChart, rateChart]);
   }
 
   function niceStep(range) {
@@ -345,64 +377,88 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     return 10 * mag;
   }
 
-  function drawChart(key, pts, color, buyDate, buyPrice, axisFmt, tipFmt) {
-    const svg = $(key + "-chart"), box = $(key + "-box"), tip = $(key + "-tip");
-    const W = Math.max(320, Math.round(box.clientWidth || 700)), H = W < 560 ? 260 : 340;
+  // Draws one line chart. All charts on a tab share the same dates so they line up.
+  function drawChart(o) {
+    const svg = $(o.key + "-chart"), box = $(o.key + "-box"), tip = $(o.key + "-tip");
+    const W = Math.max(300, Math.round(box.clientWidth || 520)), H = 280;
     const L = 58, R = 14, T = 16, B = 34;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     const css = getComputedStyle(document.documentElement);
     const col = (n) => css.getPropertyValue(n).trim();
-    const c = col(color), muted = col("--muted");
+    const c = col(o.color), muted = col("--muted");
+    const pts = o.pts;
+    if (!pts.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="14" fill="${muted}">No data yet</text>`; return null; }
 
-    const x0 = D(pts[0].date), x1 = D(pts[pts.length - 1].date), span = Math.max(1, x1 - x0);
+    const x0 = D(o.dates[0]), x1 = D(o.dates[o.dates.length - 1]), span = Math.max(1, x1 - x0);
     const X = (s) => L + (D(s) - x0) / span * (W - L - R);
-    let lo = Math.min(buyPrice, ...pts.map((p) => p.v)), hi = Math.max(buyPrice, ...pts.map((p) => p.v));
-    const pad = Math.max((hi - lo) * 0.12, buyPrice * 0.001); lo -= pad; hi += pad;
+    const vals = pts.map((p) => p.v).concat(o.ref != null ? [o.ref] : []);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = Math.max((hi - lo) * 0.12, Math.abs(hi) * 0.001); lo -= pad; hi += pad;
     const Y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
 
     let g = "";
     const step = niceStep(hi - lo);
-    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) {
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-12; v += step) {
       const y = Y(v).toFixed(1);
       g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${col("--soft")}"/>`;
-      g += `<text x="${L - 8}" y="${+y + 4}" text-anchor="end" font-size="12" fill="${muted}" font-family="IBM Plex Mono, monospace">${axisFmt(v)}</text>`;
+      g += `<text x="${L - 8}" y="${+y + 4}" text-anchor="end" font-size="12" fill="${muted}" font-family="IBM Plex Mono, monospace">${o.axisFmt(v)}</text>`;
     }
     let lastLabel = -1e9;
-    for (const p of pts) {
-      if (X(p.date) - lastLabel < 70 || X(p.date) > W - R - 24) continue;
-      lastLabel = X(p.date);
-      g += `<text x="${X(p.date)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="${muted}">${shortDate(p.date)}</text>`;
+    for (const d of o.dates) {
+      if (X(d) - lastLabel < 70 || X(d) > W - R - 24) continue;
+      lastLabel = X(d);
+      g += `<text x="${X(d)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="${muted}">${shortDate(d)}</text>`;
     }
-    // purchase price and date
-    g += `<line x1="${L}" x2="${W - R}" y1="${Y(buyPrice)}" y2="${Y(buyPrice)}" stroke="${muted}" stroke-dasharray="4 4"/>`;
-    g += `<text x="${L + 6}" y="${Y(buyPrice) - 6}" font-size="12" fill="${muted}">our price ${tipFmt(buyPrice)}</text>`;
-    if (buyDate >= pts[0].date && buyDate <= pts[pts.length - 1].date) {
-      const x = X(buyDate);
+    if (o.ref != null) {
+      g += `<line x1="${L}" x2="${W - R}" y1="${Y(o.ref)}" y2="${Y(o.ref)}" stroke="${muted}" stroke-dasharray="4 4"/>`;
+      g += `<text x="${L + 6}" y="${Y(o.ref) - 6}" font-size="12" fill="${muted}">${o.refLabel}</text>`;
+    }
+    if (o.buyDate >= o.dates[0] && o.buyDate <= o.dates[o.dates.length - 1]) {
+      const x = X(o.buyDate);
       g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - B}" stroke="${muted}" stroke-dasharray="4 4"/>`;
       g += `<text x="${x - 6}" y="${T + 10}" text-anchor="end" font-size="12" fill="${muted}">bought</text>`;
     }
-    const before = pts.filter((p) => p.date <= buyDate), after = pts.filter((p) => p.date >= buyDate);
+    const before = pts.filter((p) => p.date <= o.buyDate), after = pts.filter((p) => p.date >= o.buyDate);
     const line = (ps, op) => ps.length > 1 ? `<path d="${ps.map((p, i) => (i ? "L" : "M") + X(p.date).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${c}" stroke-opacity="${op}" stroke-width="2.5" stroke-linejoin="round"/>` : "";
     g += line(before, 0.35) + line(after, 1);
     const lastPt = pts[pts.length - 1];
     g += `<circle cx="${X(lastPt.date)}" cy="${Y(lastPt.v)}" r="4" fill="${c}"/>`;
     g += `<line class="hair" y1="${T}" y2="${H - B}" stroke="${col("--ink2")}" visibility="hidden"/>`;
+    g += `<circle class="hdot" r="4.5" fill="${c}" stroke="${col("--card")}" stroke-width="2" visibility="hidden"/>`;
     svg.innerHTML = g;
 
-    const hair = svg.querySelector(".hair");
-    svg.onmousemove = (e) => {
-      const r = svg.getBoundingClientRect();
-      const mx = (e.clientX - r.left) / r.width * W;
-      let best = pts[0];
-      for (const p of pts) if (Math.abs(X(p.date) - mx) < Math.abs(X(best.date) - mx)) best = p;
-      hair.setAttribute("x1", X(best.date)); hair.setAttribute("x2", X(best.date)); hair.setAttribute("visibility", "visible");
-      tip.innerHTML = `<b>${fmtDate(best.date)}</b><br>${tipFmt(best.v)} <span style="color:var(--muted)">(${pct(best.v / buyPrice - 1, true)} vs. our price)</span>`;
-      tip.hidden = false;
-      const left = X(best.date) / W * r.width;
-      tip.style.left = Math.min(r.width - tip.offsetWidth, Math.max(0, left + 12)) + "px";
-      tip.style.top = "6px";
+    const hair = svg.querySelector(".hair"), hdot = svg.querySelector(".hdot");
+    return {
+      svg, W,
+      nearestDate(clientX) {
+        const r = svg.getBoundingClientRect(), mx = (clientX - r.left) / r.width * W;
+        let best = o.dates[0];
+        for (const d of o.dates) if (Math.abs(X(d) - mx) < Math.abs(X(best) - mx)) best = d;
+        return best;
+      },
+      show(date) {
+        let p = pts[0];
+        for (const q of pts) if (Math.abs(D(q.date) - D(date)) < Math.abs(D(p.date) - D(date))) p = q;
+        const x = X(p.date);
+        hair.setAttribute("x1", x); hair.setAttribute("x2", x); hair.setAttribute("visibility", "visible");
+        hdot.setAttribute("cx", x); hdot.setAttribute("cy", Y(p.v)); hdot.setAttribute("visibility", "visible");
+        tip.innerHTML = `<b>${fmtDate(p.date)}</b><br>${o.tipFmt(p)}`;
+        tip.hidden = false;
+        const r = svg.getBoundingClientRect(), left = x / W * r.width;
+        tip.style.left = (left + 12 + tip.offsetWidth > r.width ? left - 12 - tip.offsetWidth : left + 12) + "px";
+        tip.style.top = "6px";
+      },
+      hide() { tip.hidden = true; hair.setAttribute("visibility", "hidden"); hdot.setAttribute("visibility", "hidden"); },
     };
-    svg.onmouseleave = () => { tip.hidden = true; hair.setAttribute("visibility", "hidden"); };
+  }
+
+  // Hovering on any chart highlights the same date on every chart in the group
+  function linkCharts(charts) {
+    const live = charts.filter(Boolean);
+    for (const c of live) {
+      c.svg.onmousemove = (e) => { const d = c.nearestDate(e.clientX); live.forEach((k) => k.show(d)); };
+      c.svg.onmouseleave = () => live.forEach((k) => k.hide());
+    }
   }
 
   // ---------- Tabs ----------
