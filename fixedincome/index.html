@@ -34,7 +34,12 @@ header h1{margin:0;font-size:30px;font-weight:600;letter-spacing:-.02em}
 header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .banner{margin:18px 0 0;padding:10px 14px;border-radius:8px;background:var(--warn-bg);color:var(--warn-ink);font-size:15px}
 
-.summary{margin:16px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.spec{margin:16px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 26px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
+.spec .k{font-size:13px;color:var(--muted)}
+.spec .v{font-size:21px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin-top:2px}
+.spec .n{font-size:13px;color:var(--ink2);margin-top:2px}
+@media (max-width:860px){.spec{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.summary{margin:12px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .summary div{background:var(--card);padding:12px 18px}
 .summary .k{font-size:13px;color:var(--muted)}
 .summary .v{font-size:22px;font-weight:500;margin-top:2px}
@@ -98,6 +103,8 @@ footer a{color:inherit}
     <button class="tsy" role="tab" id="tab-treasury" aria-controls="panel-treasury" aria-selected="true"><span class="sw"></span><span class="long">10-Year Treasury Note</span><span class="short">Treasury Note</span></button>
     <button class="mbs" role="tab" id="tab-vmbs" aria-controls="panel-vmbs" aria-selected="false"><span class="sw"></span><span class="long">Mortgage-Backed Securities ETF (VMBS)</span><span class="short">MBS ETF (VMBS)</span></button>
   </nav>
+
+  <section class="spec" id="spec" aria-label="What the selected security is"></section>
 
   <section class="summary" aria-label="Summary for the selected security">
     <div><div class="k">Paid</div><div class="v num" id="s-paid">–</div></div>
@@ -235,7 +242,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const nextCoupon = couponPeriod(t.maturity, D(tLast.date)).next;
 
     $("t-name").textContent = t.name;
-    $("t-sub").textContent = `${t.coupon}% coupon · matures ${fmtDate(t.maturity)} · $${t.face.toLocaleString()} face · CUSIP ${t.cusip}`;
+    $("t-sub").textContent = `CUSIP ${t.cusip}`;
     $("t-paidnote").textContent = `${fmtDate(t.tradeDate)}: price ${t.cleanPrice.toFixed(4)} per $100, plus ${usd(aiPaid)} accrued interest`;
     $("t-paid").textContent = usd(tPaid);
     $("t-valnote").textContent = `${fmtDate(tLast.date)} close: price ${tLast.eod.toFixed(4)} per $100, plus ${usd(aiNow)} accrued interest`;
@@ -264,7 +271,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const lastDist = dist[dist.length - 1];
 
     $("m-name").textContent = `${m.name} (${m.ticker})`;
-    $("m-sub").textContent = `Agency mortgage-backed securities fund · ${m.shares} shares · distributions paid monthly`;
+    $("m-sub").textContent = `Agency mortgage-backed securities fund · ticker ${m.ticker}`;
     $("m-paidnote").textContent = `${fmtDate(m.tradeDate)}: ${m.shares} shares at $${m.price.toFixed(2)}`;
     $("m-paid").textContent = usd(mPaid);
     $("m-valnote").textContent = `${fmtDate(mLast.date)} close: $${mLast.close.toFixed(2)} per share`;
@@ -279,6 +286,23 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const isT = !$("panel-treasury").hidden;
     const S = isT ? {paid: tPaid, value: tValue, cash: tCash, gain: tGain, label: "Coupons received"}
                   : {paid: mPaid, value: mValue, cash: mCash, gain: mGain, label: "Distributions received"};
+    const spec = (items) => items.map(([k, v, n]) => `<div><div class="k">${k}</div><div class="v">${v}</div>${n ? `<div class="n">${n}</div>` : ""}</div>`).join("");
+    const cNext = couponPeriod(t.maturity, D(tLast.date)).next;
+    const cDates = [cNext, addMonths(cNext, 6)].sort((a, b) => a.getUTCMonth() - b.getUTCMonth())
+      .map((d) => d.toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"})).join(" and ");
+    $("spec").style.setProperty("--c", isT ? "var(--tsy)" : "var(--mbs)");
+    $("spec").innerHTML = isT ? spec([
+      ["Face value", usd(t.face).replace(".00", ""), "repaid at maturity"],
+      ["Coupon", `${t.coupon}% a year`, "paid twice a year"],
+      ["Each coupon payment", usd(couponAmt), `every ${cDates}`],
+      ["Matures", fmtDate(t.maturity), `${Math.round(days(D(tLast.date), D(t.maturity)) / 365.25 * 10) / 10} years from now`],
+    ]) : spec([
+      ["Shares", `${m.shares}`, "no face value"],
+      ["Distributions", "Monthly", "amount changes each month"],
+      ["Last distribution", usd(lastDist.amount * m.shares), `$${lastDist.amount.toFixed(3)} per share, ex-date ${shortDate(lastDist.exDate)}`],
+      ["Matures", "Never", "the fund replaces mortgages as they pay off"],
+    ]);
+
     $("s-paid").textContent = usd(S.paid);
     $("s-value").textContent = usd(S.value);
     $("s-cashlabel").textContent = S.label;
