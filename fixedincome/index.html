@@ -124,11 +124,11 @@ footer a{color:inherit}
   <section class="panel" role="tabpanel" id="panel-treasury" aria-labelledby="tab-treasury">
     <div class="charts">
       <article class="card">
-        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield.</p></div>
         <div class="chartbox" id="ty-box"><svg id="ty-chart" role="img" aria-label="Yield on a newly issued 10-year Treasury note"></svg><div class="tip" id="ty-tip" hidden></div></div>
       </article>
       <article class="card">
-        <div class="charthead"><h3 id="t-charttitle">Price of our note (issued May 2026)</h3><p>Per $100 of face value. Dashed lines mark when we bought and our price.</p></div>
+        <div class="charthead"><h3 id="t-charttitle">Price of our note (issued May 2026)</h3><p>Per $100 of face value.</p></div>
         <div class="chartbox" id="t-box"><svg id="t-chart" role="img" aria-label="Price history of our Treasury note"></svg><div class="tip" id="t-tip" hidden></div></div>
       </article>
     </div>
@@ -140,6 +140,7 @@ footer a{color:inherit}
           <div><div class="k">Yield to maturity today</div><div class="v num" id="t-ytm"></div></div>
           <div><div class="k">When we bought</div><div class="v num" id="t-ytm0"></div></div>
           <div><div class="k">Current yield</div><div class="v num" id="t-cy"></div></div>
+          <div><div class="k">10-year Treasury yield today</div><div class="v num" id="t-ten"></div></div>
         </div>
         <table>
           <tr><td>Paid<span class="note" id="t-paidnote"></span></td><td class="num" id="t-paid"></td></tr>
@@ -164,11 +165,11 @@ Gain or loss   = worth if sold + coupons received − paid</div>
   <section class="panel mbs" role="tabpanel" id="panel-vmbs" aria-labelledby="tab-vmbs" hidden>
     <div class="charts">
       <article class="card">
-        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield. Dashed line marks the yield when we bought.</p></div>
+        <div class="charthead"><h3>Yield on a newly issued 10-year Treasury</h3><p>Treasury daily par yield.</p></div>
         <div class="chartbox" id="my-box"><svg id="my-chart" role="img" aria-label="Yield on a newly issued 10-year Treasury note"></svg><div class="tip" id="my-tip" hidden></div></div>
       </article>
       <article class="card">
-        <div class="charthead"><h3>VMBS price per share</h3><p>Closing price. Dashed lines mark when we bought and our price.</p></div>
+        <div class="charthead"><h3>VMBS price per share</h3><p>Closing price.</p></div>
         <div class="chartbox" id="m-box"><svg id="m-chart" role="img" aria-label="VMBS price history"></svg><div class="tip" id="m-tip" hidden></div></div>
       </article>
     </div>
@@ -179,6 +180,7 @@ Gain or loss   = worth if sold + coupons received − paid</div>
         <div class="yields">
           <div><div class="k">12-month distribution yield</div><div class="v num" id="m-dy"></div></div>
           <div><div class="k">When we bought</div><div class="v num" id="m-dy0"></div></div>
+          <div><div class="k">10-year Treasury yield today</div><div class="v num" id="m-ten"></div></div>
         </div>
         <table>
           <tr><td>Paid<span class="note" id="m-paidnote"></span></td><td class="num" id="m-paid"></td></tr>
@@ -274,7 +276,6 @@ Gain or loss  = worth if sold + distributions received − paid</div>
 
     const issue = t.issueDate || iso(addMonths(D(t.maturity), -120));
     const issueMonth = D(issue).toLocaleDateString("en-US", {month: "long", year: "numeric", timeZone: "UTC"});
-    const monthsBetween = (a, b) => { const x = D(a), y = D(b); return (y.getUTCFullYear() - x.getUTCFullYear()) * 12 + y.getUTCMonth() - x.getUTCMonth() - (y.getUTCDate() < x.getUTCDate() ? 1 : 0); };
     const yearsLeft = (from) => Math.round(days(D(from), D(t.maturity)) / 365.25 * 10) / 10;
     $("t-name").textContent = `${t.name}, issued ${issueMonth}`;
     $("t-sub").textContent = `${t.coupon}% note due ${fmtDate(t.maturity)} · CUSIP ${t.cusip}`;
@@ -289,6 +290,10 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     $("t-ytm").textContent = pct(ytm(t, tLast.eod, nowSettle));
     $("t-ytm0").textContent = pct(ytm(t, t.cleanPrice, tSettle));
     $("t-cy").textContent = pct(t.coupon / tLast.eod);
+    const tenYear = (px.rates && px.rates.tenYear) || [];
+    const tenNow = tenYear.length ? pct(tenYear[tenYear.length - 1].rate / 100) : "–";
+    $("t-ten").textContent = tenNow;
+    $("m-ten").textContent = tenNow;
 
     // ---- VMBS ----
     const m = trade.vmbs;
@@ -331,16 +336,15 @@ Gain or loss  = worth if sold + distributions received − paid</div>
       .map((d) => d.toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"})).join(" and ");
     $("spec").style.setProperty("--c", isT ? "var(--tsy)" : "var(--mbs)");
     $("spec").innerHTML = isT ? spec([
-      ["Issued", fmtDate(issue), t.auctionDate ? `auctioned ${shortDate(t.auctionDate)} at ${t.auctionPrice.toFixed(2)}` : "as a new 10-year note"],
       ["Face value", usd(t.face).replace(".00", ""), "repaid at maturity"],
-      ["Coupon", `${t.coupon}% a year`, t.auctionHighYield ? `auction yield ${t.auctionHighYield.toFixed(3)}%` : `set at the ${issueMonth} auction`],
+      ["Coupon", `${t.coupon}% a year`, "paid twice a year"],
       ["Each coupon payment", usd(couponAmt), `every ${cDates}`],
       ["Matures", fmtDate(t.maturity), `${yearsLeft(tLast.date)} years left`],
     ]) : spec([
       ["Shares", `${m.shares}`, "no face value"],
       ["Distributions", "Monthly", "amount changes each month"],
       ["Last distribution", usd(lastDist.amount * m.shares), `$${lastDist.amount.toFixed(3)} per share, ex-date ${shortDate(lastDist.exDate)}`],
-      ["Matures", "Never", "the fund replaces mortgages as they pay off"],
+      ["Matures", "Never", "fund keeps buying new pools"],
     ]);
 
     $("s-paid").textContent = usd(S.paid);
@@ -352,8 +356,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const held = days(S.flows[0].date, S.flows[S.flows.length - 1].date);
     $("s-ry").textContent = held < 1 ? `Realized yield: ${pct(0)}`
       : `Realized yield: ${pct(realizedYield(S.flows))} a year`;
-    const age = monthsBetween(issue, t.tradeDate);
-    $("asof").textContent = isT ? `Purchased ${fmtDate(t.tradeDate)}, ${age} month${age === 1 ? "" : "s"} after the note was issued on ${fmtDate(issue)}, with ${yearsLeft(t.tradeDate)} years left to maturity · Price as of ${fmtDate(tLast.date)}`
+    $("asof").textContent = isT ? `Purchased ${fmtDate(t.tradeDate)} · Issued ${fmtDate(issue)} · Price as of ${fmtDate(tLast.date)}`
                                 : `Purchased ${fmtDate(m.tradeDate)} · Price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
