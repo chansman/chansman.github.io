@@ -326,8 +326,9 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     $("s-gainpct").textContent = `Percentage gain: ${pct(S.gain / S.paid, true)}`;
     const held = days(S.flows[0].date, S.flows[S.flows.length - 1].date);
     $("s-ry").textContent = held < 1 ? `Realized yield: ${pct(0)}`
-      : `Realized yield: ${pct(realizedYield(S.flows))} a year · ${held} day${held === 1 ? "" : "s"} held`;
-    $("asof").textContent = `Treasury price as of ${fmtDate(tLast.date)} · VMBS price as of ${fmtDate(mLast.date)}`;
+      : `Realized yield: ${pct(realizedYield(S.flows))} a year`;
+    $("asof").textContent = isT ? `Purchased ${fmtDate(t.tradeDate)} · Price as of ${fmtDate(tLast.date)}`
+                                : `Purchased ${fmtDate(m.tradeDate)} · Price as of ${fmtDate(mLast.date)}`;
     if (px.updated) $("updated").textContent = `Last update: ${px.updated.replace("T", " ").replace("Z", " UTC")}.`;
 
     // ---- Chart for the visible tab ----
