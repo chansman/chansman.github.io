@@ -93,17 +93,15 @@
        instead of staying indented under a photo that ended above them. */
     .top { margin-bottom: clamp(28px, 4vw, 40px); }
     .top::after { content: ""; display: block; clear: both; }
-    /* 10.23em wide. The four contact lines plus the facts block come to
-       10.23em × the photo's 503:640 aspect, so its bottom edge lands on the
-       last line of Education — and because both sides are now in em, that
-       alignment holds at every font size rather than only at 12px. It was
-       9em with three contact lines; the courtesy appointment added a fourth
-       and the photo grew to keep the two bottom edges level. */
+    /* 9em wide. The contact lines plus the facts block come to 9em × the
+       photo's 503:640 aspect, so its bottom edge lands on the last line of
+       Education — and because both sides are now in em, that alignment
+       holds at every font size rather than only at 12px. */
     .portrait {
         /* holds 9em down to ~525px, then shrinks rather than crowding the
            text beside it into an unreadable column */
         float: left;
-        width: clamp(80px, 24vw, 10.23em);
+        width: clamp(80px, 24vw, 9em);
         margin-right: clamp(14px, 4vw, 26px);
         height: auto;
         display: block;
@@ -196,10 +194,9 @@
     <img class="portrait" src="./images/headshot_web.jpg" width="503" height="640" alt="Christopher Hansman">
     <div class="details">
         <div class="masthead">
-            <div class="m">Associate Professor of Economics, Department&nbsp;of&nbsp;Economics</div>
-            <div class="m">Associate Professor of Finance (by courtesy), Goizueta&nbsp;Business&nbsp;School</div>
+            <div class="m">Associate Professor of Economics, Emory&nbsp;University</div>
             <div class="m">332 Rich Memorial Building, Atlanta,&nbsp;GA&nbsp;30322</div>
-            <div><a href="https://www.emory.edu">Emory&nbsp;University</a><span class="sep" aria-hidden="true">&middot;</span><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a><span class="sep" aria-hidden="true">&middot;</span><a href="./Hansman_cv_Sept2026.pdf">cv</a></div>
+            <div><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a><span class="sep" aria-hidden="true">&middot;</span><a href="./Hansman_cv_Sept2026.pdf">cv</a></div>
         </div>
         <div class="facts">
             <div class="row"><span class="k">Interests</span><span class="v">Household Finance, Corporate Finance, Urban</span></div>
