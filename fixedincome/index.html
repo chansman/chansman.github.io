@@ -8,21 +8,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" integrity="sha512-aOFyMMzZF7l7ei3vOKgQiRhZnYqk9YC/uMzl4T0j5N5D3Kul+QAFU8ssENDRMAqr/lxDOjMF69dSYJ8HYqY+WQ==" crossorigin="anonymous">
+<script id="katex-js" defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" integrity="sha512-UPFOadao2nEorjtjl0xUTtN3w20Ja143UPEU6EyJ1mi5MB2bDtMkiWmqGDqi47xNLB5z1dy31GKJDEWhjUJFiQ==" crossorigin="anonymous"></script>
 <style>
 :root{
   color-scheme:light dark;
-  --bg:#f6f5f1; --card:#ffffff; --ink:#17191c; --ink2:#454b52; --muted:#6b727a;
-  --line:#e2e0da; --soft:#efede7;
-  --tsy:#1f5f99; --mbs:#b3542a;
-  --gain:#157a48; --loss:#b3261e;
-  --warn-bg:#fff4d6; --warn-ink:#6b4a00;
+  --bg:#faf9f6; --card:#faf9f6; --ink:#14161a; --ink2:#3f454c; --muted:#6f747c;
+  --line:#d2d0c9; --soft:#e8e6df;
+  --tsy:#0b5563; --mbs:#8f3f1e;
+  --gain:#0a6c4a; --loss:#a3251c;
+  --warn-bg:#f2e7c9; --warn-ink:#5a4510;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#121417; --card:#1b1e22; --ink:#eceef0; --ink2:#c3c8ce; --muted:#939aa2;
-  --line:#2c3036; --soft:#23272c;
-  --tsy:#6aa8e0; --mbs:#e58a5c;
-  --gain:#4cc38a; --loss:#f07a70;
-  --warn-bg:#3a2f12; --warn-ink:#f3d58a;
+  --bg:#10151a; --card:#10151a; --ink:#e8edf2; --ink2:#bcc7d2; --muted:#8b98a6;
+  --line:#28313b; --soft:#1e262f;
+  --tsy:#5fb3c6; --mbs:#dd8a5e;
+  --gain:#4fc78f; --loss:#f0776d;
+  --warn-bg:#33290f; --warn-ink:#ecd08c;
 }}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -32,36 +34,45 @@ body{background:var(--bg);color:var(--ink);font:400 17px/1.5 Inter,-apple-system
 .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 48px}
 header h1{margin:0;font-size:30px;font-weight:600;letter-spacing:-.02em}
 header p{margin:4px 0 0;color:var(--muted);font-size:15px}
-.banner{margin:18px 0 0;padding:10px 14px;border-radius:8px;background:var(--warn-bg);color:var(--warn-ink);font-size:15px}
+.banner{margin:18px 0 0;padding:2px 0 2px 14px;border-left:3px solid var(--warn-ink);color:var(--ink2);font-size:15px}
 
-.spec{margin:16px 0 0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:18px 26px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
+.spec{margin:24px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:16px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.spec>div{padding:0 20px}
+.spec>div:first-child{padding-left:0}
 .spec .k{font-size:13px;color:var(--muted)}
 .spec .v{font-size:21px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin-top:2px}
 .spec .n{font-size:13px;color:var(--ink2);margin-top:2px}
-@media (max-width:860px){.spec{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}}
-.summary{margin:12px 0 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.summary>div{background:var(--card);padding:12px 18px}
+@media (max-width:860px){.spec{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}}
+.summary{margin:0 0 30px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:2px solid var(--ink)}
+.summary>div{padding:14px 20px;border-left:1px solid var(--line)}
+.summary>div:first-child{padding-left:0;border-left:0}
 .summary .sm{font-size:13px;color:var(--muted);margin-top:2px}
 .summary .k{font-size:13px;color:var(--muted)}
 .summary .v{font-size:22px;font-weight:500;margin-top:2px}
-@media (max-width:760px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+.spec>div:nth-child(odd),.summary>div:nth-child(odd){padding-left:0;border-left:0}
+.summary>div:nth-child(n+3){border-top:1px solid var(--line)}}
 
-.tabs{display:inline-flex;gap:4px;margin:22px 0 0;padding:4px;background:var(--soft);border-radius:999px;max-width:100%;overflow-x:auto}
-.tabs button{font:500 15px/1.2 Inter,sans-serif;color:var(--muted);background:none;border:0;border-radius:999px;padding:9px 16px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:26px;margin:24px 0 0;border-bottom:1px solid var(--line);max-width:100%;overflow-x:auto}
+.tabs button{font:500 15px/1.2 Inter,sans-serif;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;padding:10px 0;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
 .tabs button:hover{color:var(--ink)}
-.tabs button[aria-selected="true"]{color:var(--ink);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--c)}
 .tabs button:focus-visible{outline:2px solid var(--c);outline-offset:1px}
 .tabs .tsy{--c:var(--tsy)} .tabs .mbs{--c:var(--mbs)}
 .tabs .short{display:none}
 @media (max-width:600px){.tabs .long{display:none}.tabs .short{display:inline}}
-.tabs .sw{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:8px;vertical-align:1px}
+.tabs .sw{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--c);margin-right:8px;vertical-align:1px}
 
 .panel{--c:var(--tsy)} .panel.mbs{--c:var(--mbs)}
-.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.charts .card:first-child{padding-right:34px}
+.charts .card+.card{border-left:1px solid var(--line);padding-left:34px}
 .charts .card{display:flex;flex-direction:column}
 .charts .chartbox{margin-top:auto;padding-top:10px}
-@media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}}
-.detailcard{margin-top:18px}
+@media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}
+.charts .card:first-child{padding-right:0}
+.charts .card+.card{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:26px;margin-top:26px}}
+.detailcard{margin-top:36px}
 .rows{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);column-gap:44px}
 .rows>div{border-top:1px solid var(--soft);padding:10px 0;display:flex;align-items:center;min-height:64px}
 .rows .y{flex-direction:column;align-items:flex-start;justify-content:center}
@@ -72,8 +83,8 @@ header p{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rows .d .num{white-space:nowrap}
 .rows .total{font-weight:600;border-top-color:var(--line)}
 @media (max-width:700px){.rows{column-gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
-.card.accent{border-top:4px solid var(--c)}
+.card{padding:0}
+.card.accent{border-top:2px solid var(--c);padding-top:20px}
 .card h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
 .card .sub{margin:2px 0 14px;color:var(--muted);font-size:14px}
 .big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -95,13 +106,29 @@ tr.total td{border-top:1px solid var(--line);font-weight:600}
 .charthead p{margin:2px 0 0;font-size:13px;color:var(--muted)}
 .chartbox{position:relative;margin-top:10px}
 svg{display:block;width:100%;height:auto;overflow:visible}
-.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--ink2);border-radius:2px;padding:6px 10px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.10);white-space:nowrap}
 
-details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 22px;color:var(--ink2);font-size:15px}
+details{margin-top:30px;border-top:1px solid var(--line);padding:14px 0 0;color:var(--ink2);font-size:15px}
 summary{cursor:pointer;font-weight:600;color:var(--ink)}
 details p{margin:10px 0 0}
-.eq{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px;background:var(--soft);border-radius:6px;padding:8px 10px;margin:10px 0 0;overflow-x:auto;white-space:pre;color:var(--ink)}
-footer{margin-top:22px;color:var(--muted);font-size:13px}
+.eq{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px;background:var(--soft);border-radius:2px;padding:8px 10px;margin:10px 0 0;overflow-x:auto;white-space:pre;color:var(--ink)}
+.part{margin-top:0;border-top:1px solid var(--line);padding:0}
+.part>summary{padding:13px 0;font-size:15px}
+.part[open]>summary{color:var(--c)}
+.part .body{padding:0 0 22px}
+.calc p{margin:6px 0 0;color:var(--ink2);font-size:15px}
+.calcitem{margin:0;border-top:1px solid var(--soft);padding:0}
+.calcitem>summary{padding:11px 0;font-size:15px}
+.calcitem[open]>summary{color:var(--c)}
+.calcbody{padding:2px 0 20px}
+.calcbody>p:first-child{margin-top:4px}
+.calc p.aside{margin:14px 0 0}
+.calc .mline,.calc .mcenter{margin:10px 0 0;overflow-x:auto;overflow-y:hidden}
+.calc .mcenter{margin:16px 0;padding:14px 0;border-top:1px solid var(--soft);border-bottom:1px solid var(--soft)}
+.calc .mline .katex-display{margin:0}
+.calc .mcenter .katex-display{margin:0}
+.calc .katex{font-size:1.05em;color:var(--ink)}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 footer a{color:inherit}
 </style>
 </head>
@@ -155,12 +182,7 @@ footer a{color:inherit}
     </article>
     <details>
       <summary>How these numbers are calculated</summary>
-      <p>At auction, Treasury sets the coupon at the winning (high) yield rounded down to the nearest ⅛ of a percent, so a new note sells at or slightly below $100.</p>
-      <p>Treasury prices are quoted per $100 of face value. A buyer also pays the seller the interest that has built up since the last coupon (accrued interest), and gets it back in the next coupon.</p>
-      <div class="eq">Worth if sold  = price/100 × face + accrued interest
-Accrued interest = (coupon/2 × face) × days since last coupon ÷ days in coupon period
-Gain or loss   = worth if sold + coupons received − paid</div>
-      <p>The yield to maturity is the rate <i>y</i> that makes the present value of the remaining coupons and the $100 repayment, discounted every six months at <i>y</i>/2, equal to the price plus accrued interest. The current yield is the coupon divided by the price.</p>
+      <div id="t-explain"></div>
     </details>
   </section>
 
@@ -294,6 +316,163 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const tenNow = tenYear.length ? pct(tenYear[tenYear.length - 1].rate / 100) : "–";
     $("t-ten").textContent = tenNow;
     $("m-ten").textContent = tenNow;
+
+    // ---- Every number on the page, worked out with today's values ----
+    (function explain() {
+      const per = t.coupon / 2;                       // coupon per $100 of face, per half year
+      const cp0 = couponPeriod(t.maturity, tSettle);  // coupon period our purchase settled in
+      const cpN = couponPeriod(t.maturity, nowSettle);// coupon period today's price settles in
+      const D0 = days(cp0.prev, cp0.next), d0 = days(cp0.prev, tSettle);
+      const DN = days(cpN.prev, cpN.next), dN = days(cpN.prev, nowSettle);
+      const e0 = d0 / D0, eN = dN / DN;               // share of the period already gone
+      const k0 = D0 - d0, kN = DN - dN;               // days left to the next coupon
+      const w0 = 1 - e0, wN = 1 - eN;                 // share still to run
+      const nFrom = (from) => { let n = 0; for (let d = from; d <= D(t.maturity); d = addMonths(d, 6)) n++; return n; };
+      const n0 = nFrom(cp0.next), nN = nFrom(cpN.next);
+      const dirty0 = t.cleanPrice + per * e0, dirtyN = tLast.eod + per * eN;
+      const y0 = ytm(t, t.cleanPrice, tSettle), yN = ytm(t, tLast.eod, nowSettle);
+      const pvAt = (y, n, w) => { let v = 0; for (let k = 0; k < n; k++) v += per / Math.pow(1 + y / 2, k + w); return v + 100 / Math.pow(1 + y / 2, n - 1 + w); };
+      const vNov = (y, n) => { let v = per; for (let j = 1; j < n; j++) v += per / Math.pow(1 + y / 2, j); return v + 100 / Math.pow(1 + y / 2, n - 1); };
+      const f = (x, k) => x.toFixed(k);
+      const share = (x) => Math.round(x * 100) + "%";
+      const exact = (x) => tex("$" + x.toLocaleString("en-US", {minimumFractionDigits: 3, maximumFractionDigits: 3}));
+      const num = (x) => x.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      const tex = (s) => String(s).replace(/\u2212/g, "-").replace(/\$/g, "\\$").replace(/,/g, "{,}").replace(/%/g, "\\%");
+      const $$ = (x, sign) => tex(usd(x, sign));
+      const P = (x, sign) => tex(pct(x, sign));
+      const P4 = (x) => f(x * 100, 4) + "\\%";
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+      const M = (s) => ({tex: s, cls: "mline"});
+      const C = (s) => ({tex: s, cls: "mcenter"});
+      // one dropdown per calculation; a shared name lets the browser keep just one open
+      const mk = (grp) => (h, said, ...lines) =>
+        `<details class="calcitem" name="${grp}"><summary>${h}</summary><div class="calcbody">` +
+        (said ? `<p>${said}</p>` : "") +
+        lines.filter(Boolean).map((l) => l.tex
+          ? `<div class="${l.cls}"><span data-tex="${esc(l.tex)}">${esc(l.tex)}</span></div>`
+          : `<p class="aside">${l}</p>`).join("") + `</div></details>`;
+      const item = mk("calc-dollars"), item2 = mk("calc-yields");
+
+      const tenLast = ((px.rates && px.rates.tenYear) || []).slice(-1)[0];
+      const gapBp = tenLast ? Math.abs(yN * 100 - tenLast.rate) * 100 : null;
+
+      const paidCoupons = [];
+      for (let d = cp0.next; d <= D(tLast.date); d = addMonths(d, 6)) paidCoupons.push(iso(d));
+
+      const rFlows = [{date: tSettle, amt: -tPaid}, ...paidCoupons.map((d) => ({date: D(d), amt: couponAmt})), {date: nowSettle, amt: tValue}];
+      const held = days(rFlows[0].date, rFlows[rFlows.length - 1].date);
+      const ry = held < 1 ? 0 : realizedYield(rFlows);
+      const rTex = rFlows.map((fl, i) => {
+        const amt = tex(num(Math.abs(fl.amt)));
+        const dd = days(rFlows[0].date, fl.date);
+        return i === 0 ? (fl.amt < 0 ? "-" : "+") + "\\$" + amt
+                       : (fl.amt < 0 ? " - " : " + ") + "\\frac{\\$" + amt + "}{(1+r)^{" + dd + "/365}}";
+      }).join("");
+
+      const part1 = item(
+        "Face value — " + usd(t.face).replace(".00", ""),
+        "What Treasury repays on " + fmtDate(t.maturity) + ". Every price on this page is quoted per $100 of face, so a quoted price becomes dollars like this:",
+        M("\\text{dollars} = \\frac{\\text{quoted price}}{100} \\times " + tex(usd(t.face).replace(".00", "")))
+      ) + item(
+        "Each coupon payment — " + usd(couponAmt),
+        "The " + t.coupon + "% coupon is an annual rate. Treasury pays half of it every six months, on " + shortDate(iso(cpN.prev)) + " and " + shortDate(iso(cpN.next)) + ". Each payment is the same size, even though the two halves of the year are not equally long.",
+        M(tex(usd(t.face).replace(".00", "")) + " \\times \\frac{" + t.coupon + "\\%}{2} = " + $$(couponAmt))
+      ) + (t.auctionPrice ? item(
+        "Auction price — " + f(t.auctionPrice, 4) + " (the first point on the price chart)",
+        "Bidders at the " + fmtDate(t.auctionDate) + " auction cleared at a high yield of " + f(t.auctionHighYield, 3) + "%. Treasury then set the coupon at that yield rounded down to the nearest ⅛ of a point — " + t.coupon + "% — which is why bidders paid " + f(t.auctionPrice, 4) + " instead of 100."
+      ) : "") + item(
+        "Accrued interest when we bought — " + usd(aiPaid),
+        "A coupon builds up evenly over the six months before it is paid. By settlement we were " + share(e0) + " of the way through the period ending " + fmtDate(iso(cp0.next)) + ", so the seller had earned " + share(e0) + " of the coming coupon and we handed it to them. We collect the whole " + usd(couponAmt) + " on the payment date.",
+        M("\\text{accrued} = " + f(e0, 5) + " \\times " + exact(couponAmt) + " = " + $$(aiPaid)),
+        "That " + f(e0, 5) + " is " + d0 + " days out of the " + D0 + " between the two coupon dates. Treasury counts actual calendar days, so the two halves of this note's year run " + D0 + " and " + days(cp0.next, addMonths(cp0.next, 6)) + " days rather than a tidy half each."
+      ) + item(
+        "Paid — " + usd(tPaid),
+        "Our price was " + f(t.cleanPrice, 4) + " per $100 of face, settling " + fmtDate(t.settleDate) + ". The price chart's dashed line sits at that price.",
+        M("\\frac{" + f(t.cleanPrice, 4) + "}{100} \\times " + tex(usd(t.face).replace(".00", "")) + " = " + $$(t.cleanPrice / 100 * t.face)),
+        M($$(t.cleanPrice / 100 * t.face) + " + " + $$(aiPaid) + " = " + $$(tPaid))
+      ) + item(
+        "Worth if sold today — " + usd(tValue),
+        "The " + fmtDate(tLast.date) + " end-of-day price was " + f(tLast.eod, 4) + ". A sale that day would settle the next business day, " + fmtDate(iso(nowSettle)) + ", by which point " + share(eN) + " of the current coupon period has gone.",
+        M("\\frac{" + f(tLast.eod, 4) + "}{100} \\times " + tex(usd(t.face).replace(".00", "")) + " = " + $$(tLast.eod / 100 * t.face)),
+        M("\\text{accrued} = " + f(eN, 5) + " \\times " + exact(couponAmt) + " = " + $$(aiNow)),
+        M($$(tLast.eod / 100 * t.face) + " + " + $$(aiNow) + " = " + $$(tValue))
+      ) + item(
+        "Coupons received — " + usd(tCash),
+        paidCoupons.length
+          ? "Paid to us since we settled: " + paidCoupons.map((d) => fmtDate(d)).join(", ") + ". The next is " + usd(couponAmt) + " on " + fmtDate(iso(nextCoupon)) + "."
+          : "We settled on " + fmtDate(t.settleDate) + " and the first coupon after that falls on " + fmtDate(iso(nextCoupon)) + ", so nothing has been paid to us yet.",
+        paidCoupons.length ? M(paidCoupons.length + " \\times " + $$(couponAmt) + " = " + $$(tCash)) : null
+      ) + item(
+        "Gain or loss — " + usd(tGain, true),
+        "What we could sell for, plus the cash already in hand, less what we put in.",
+        M($$(tValue) + " + " + $$(tCash) + " - " + $$(tPaid) + " = " + $$(tGain, true))
+      ) + item(
+        "Percentage gain — " + pct(tGain / tPaid, true),
+        "The gain measured against what we paid.",
+        M("\\frac{" + $$(tGain, true) + "}{" + $$(tPaid) + "} = " + P(tGain / tPaid, true))
+      ) + item(
+        "Realized yield — " + (held < 1 ? pct(0) : pct(ry) + " a year"),
+        held < 1
+          ? "On the purchase day there is no time over which to earn anything, so this is set to zero."
+          : "The annual rate <i>r</i> that balances the money we put in against the money we could take out, over the " + held + " days we have held it. A small gain earned quickly annualises into a large-looking rate.",
+        held < 1 ? null : C("0 = " + rTex),
+        held < 1 ? null : M("r = " + P4(ry) + "\\ \\text{a year}")
+      );
+
+      const yFlat = (target, n) => { let lo = -0.02, hi = 0.5; for (let i = 0; i < 300; i++) { const m = (lo + hi) / 2; if (vNov(m, n) > target) lo = m; else hi = m; } return (lo + hi) / 2; };
+      const y1 = yFlat(dirtyN, nN);
+
+      const bracket = (n) => f(per, 4) + " + \\sum_{j=1}^{" + (n - 1) + "}\\frac{" + f(per, 4) + "}{(1+y/2)^{j}} + \\frac{100}{(1+y/2)^{" + (n - 1) + "}}";
+
+      const part2 = item2(
+        "Yield to maturity today — " + pct(yN),
+        "To explain yield to maturity it helps to solve a simpler problem first. Imagine buying this note on " + fmtDate(iso(cpN.next)) + " for " + f(dirtyN, 4) + ", and collecting that day's coupon along with it. What rate would make that worth paying?",
+        "The buyer gets " + f(per, 4) + " that day, another " + f(per, 4) + " every six months after it, and 100 back on " + fmtDate(t.maturity) + ". Every payment lands a whole number of half-years away, so the rate <i>y</i> that makes them add up to " + f(dirtyN, 4) + " solves:",
+        C("\\begin{aligned} " + f(dirtyN, 4) + " &= \\underbrace{" + f(per, 4) + " + \\sum_{j=1}^{" + (nN - 1) + "}\\frac{" + f(per, 4) + "}{(1+y/2)^{j}}}_{\\text{the coupons}} + \\underbrace{\\frac{100}{(1+y/2)^{" + (nN - 1) + "}}}_{\\text{the principal}} \\\\[4pt] &= " + f(per, 4) + " + \\frac{" + f(per, 4) + "}{1+y/2} + \\frac{" + f(per, 4) + "}{(1+y/2)^{2}} + \\cdots + \\frac{" + f(per, 4) + "}{(1+y/2)^{" + (nN - 1) + "}} + \\frac{100}{(1+y/2)^{" + (nN - 1) + "}} \\end{aligned}"),
+        "Solving numerically for <i>y</i>:",
+        M("y = " + P4(y1)),
+        "We are not buying on " + shortDate(iso(cpN.next)) + ". Settlement is " + fmtDate(iso(nowSettle)) + ", " + kN + " days before that coupon date, which is " + f(wN, 4) + " of a coupon period. The buyer pays the same " + f(dirtyN, 4) + " for the same payments but waits " + kN + " days longer for every one of them, so the whole right-hand side is discounted that much further:",
+        C(f(dirtyN, 4) + " = \\frac{\\displaystyle\\left[\\, " + bracket(nN) + " \\,\\right]}{(1+y/2)^{" + f(wN, 4) + "}}"),
+        "The " + f(dirtyN, 4) + " on the left is the " + fmtDate(tLast.date) + " price plus the " + share(eN) + " of the coming coupon the seller has earned:",
+        M("\\text{price} + \\text{accrued} = " + f(tLast.eod, 4) + " + " + f(eN, 5) + " \\times " + f(per, 4) + " = " + f(dirtyN, 4)),
+        "Solving numerically again:",
+        M("y = " + P4(yN)),
+        "Waiting " + kN + " days longer for the same payments costs " + ((y1 - yN) * 10000).toFixed(1) + " basis points. The page shows the second one, rounded to " + pct(yN) + ". The principal is doing most of the work in both: measured at settlement the coupons are worth " + f(pvAt(yN, nN, wN) - 100 / Math.pow(1 + yN / 2, nN - 1 + wN), 4) + " of the " + f(dirtyN, 4) + " and the repayment " + f(100 / Math.pow(1 + yN / 2, nN - 1 + wN), 4) + "."
+      ) + item2(
+        "Yield to maturity when we bought — " + pct(y0),
+        "The same calculation with our own purchase price of " + f(t.cleanPrice, 4) + ". We settled " + fmtDate(t.settleDate) + ", " + k0 + " days before " + shortDate(iso(cp0.next)) + ", with " + share(e0) + " of the coupon period already gone.",
+        M("\\text{price} + \\text{accrued} = " + f(t.cleanPrice, 4) + " + " + f(e0, 5) + " \\times " + f(per, 4) + " = " + f(dirty0, 4)),
+        C(f(dirty0, 4) + " = \\frac{\\displaystyle\\left[\\, " + bracket(n0) + " \\,\\right]}{(1+y/2)^{" + f(w0, 4) + "}}"),
+        M("y = " + P4(y0)),
+        "We locked that rate in, provided we hold to " + fmtDate(t.maturity) + "."
+      ) + item2(
+        "10-year Treasury yield today — " + tenNow,
+        "Treasury fits a par yield curve to trading in its most recently issued securities and publishes it daily. The 10-year point is the coupon a ten-year security would need in order to sell for exactly $100 today. Our note and that number track each other very closely" + (gapBp == null ? ", " : " \u2014 today they sit " + gapBp.toFixed(1) + " basis points apart \u2014 ") + "since both are claims on the same government over nearly the same horizon. Our note matures in " + yearsLeft(tLast.date) + " years rather than ten, it trades at a discount so more of its value sits in the " + D(t.maturity).getUTCFullYear() + " repayment than a par bond's would, and Treasury auctioned it in " + D(t.auctionDate).toLocaleDateString("en-US", {month: "long", timeZone: "UTC"}) + ", so the curve is no longer fitted to it. The yield chart's dotted line marks where the 10-year sat on the day we bought, " + (function () { const b = [...((px.rates && px.rates.tenYear) || [])].reverse().find((r) => r.date <= t.tradeDate); return b ? pct(b.rate / 100) : "–"; })() + "."
+      ) + item2(
+        "Current yield — " + pct(t.coupon / tLast.eod),
+        "The coupon measured against today's price. It counts the cash a holder collects each year and ignores the " + (tLast.eod < 100 ? "gain" : "loss") + " waiting at maturity, when a note bought at " + f(tLast.eod, 4) + " is repaid at 100, which is why it sits " + (tLast.eod < 100 ? "below" : "above") + " the yield to maturity.",
+        M("\\frac{" + f(t.coupon, 3) + "}{" + f(tLast.eod, 4) + "} = " + P(t.coupon / tLast.eod)),
+        M("\\text{in our dollars:}\\quad \\frac{" + $$(couponAmt * 2) + "}{" + $$(tLast.eod / 100 * t.face) + "} = " + P(t.coupon / tLast.eod))
+      ) + item2(
+        "Years left — " + yearsLeft(tLast.date) + " years",
+        "Calendar days from the last price date to maturity, over the average length of a year.",
+        M("\\frac{" + days(D(tLast.date), D(t.maturity)) + "}{365.25} \\approx " + yearsLeft(tLast.date))
+      );
+
+      $("t-explain").innerHTML =
+        `<details class="part"><summary>Part 1 · The dollars</summary><div class="body calc">${part1}</div></details>` +
+        `<details class="part"><summary>Part 2 · The yields</summary><div class="body calc">${part2}</div></details>`;
+
+      const typeset = () => {
+        if (!window.katex) return;
+        for (const el of $("t-explain").querySelectorAll("span[data-tex]")) {
+          katex.render(el.getAttribute("data-tex"), el, {displayMode: true, throwOnError: false});
+        }
+      };
+      if (window.katex) typeset();
+      else $("katex-js").addEventListener("load", typeset, {once: true});
+    })();
 
     // ---- VMBS ----
     const m = trade.vmbs;
