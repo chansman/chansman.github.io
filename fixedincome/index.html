@@ -282,7 +282,9 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     // ---- Treasury ----
     const t = trade.treasury;
     const tp = px.treasury.prices;
-    const tLast = tp[tp.length - 1];
+    // Until the first close after our purchase is posted, value the note at the price we paid.
+    const tClose = tp[tp.length - 1];
+    const tLast = tClose.date < t.tradeDate ? {date: t.tradeDate, eod: t.cleanPrice, ours: true} : tClose;
     const tSettle = D(t.settleDate);
     const aiPaid = t.accruedPaid != null ? t.accruedPaid : accrued(t, tSettle);
     const tPaid = t.cleanPrice / 100 * t.face + aiPaid + (t.fees || 0);
@@ -293,7 +295,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     let tCash = 0, received = 0;
     const tFlows = [{date: tSettle, amt: -tPaid}];
     for (let d = couponPeriod(t.maturity, tSettle).next; d <= D(tLast.date); d = addMonths(d, 6)) { tCash += couponAmt; received++; tFlows.push({date: d, amt: couponAmt}); }
-    const tGain = tValue + tCash - tPaid;
+    const tGain = Math.round((tValue + tCash - tPaid) * 100) / 100 || 0;  // whole cents, so a zero gain is not shown as -$0.00
     const nextCoupon = couponPeriod(t.maturity, D(tLast.date)).next;
 
     const issue = t.issueDate || iso(addMonths(D(t.maturity), -120));
@@ -304,7 +306,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     $("t-charttitle").textContent = `Price of our note (issued ${D(issue).toLocaleDateString("en-US", {month: "short", year: "numeric", timeZone: "UTC"})})`;
     $("t-paidnote").textContent = `${fmtDate(t.tradeDate)}: price ${t.cleanPrice.toFixed(4)} per $100, plus ${usd(aiPaid)} accrued interest`;
     $("t-paid").textContent = usd(tPaid);
-    $("t-valnote").textContent = `${fmtDate(tLast.date)} close: price ${tLast.eod.toFixed(4)} per $100, plus ${usd(aiNow)} accrued interest`;
+    $("t-valnote").textContent = `${fmtDate(tLast.date)} ${tLast.ours ? "purchase" : "close"}: price ${tLast.eod.toFixed(4)} per $100, plus ${usd(aiNow)} accrued interest`;
     $("t-value").textContent = usd(tValue);
     $("t-cashnote").textContent = `${received} so far · next: ${usd(couponAmt)} on ${fmtDate(iso(nextCoupon))}`;
     $("t-cash").textContent = usd(tCash);
@@ -393,7 +395,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
         M($$(t.cleanPrice / 100 * t.face) + " + " + $$(aiPaid) + " = " + $$(tPaid))
       ) + item(
         "Worth if sold today — " + usd(tValue),
-        "The " + fmtDate(tLast.date) + " end-of-day price was " + f(tLast.eod, 4) + ". A sale that day would settle the next business day, " + fmtDate(iso(nowSettle)) + ", by which point " + share(eN) + " of the current coupon period has gone.",
+        (tLast.ours ? "Until the first end-of-day price after our purchase is posted, we value the note at the " + f(tLast.eod, 4) + " we paid on " + fmtDate(tLast.date) + "." : "The " + fmtDate(tLast.date) + " end-of-day price was " + f(tLast.eod, 4) + ".") + " A sale that day would settle the next business day, " + fmtDate(iso(nowSettle)) + ", by which point " + share(eN) + " of the current coupon period has gone.",
         M("\\frac{" + f(tLast.eod, 4) + "}{100} \\times " + tex(usd(t.face).replace(".00", "")) + " = " + $$(tLast.eod / 100 * t.face)),
         M("\\text{accrued} = " + f(eN, 5) + " \\times " + exact(couponAmt) + " = " + $$(aiNow)),
         M($$(tLast.eod / 100 * t.face) + " + " + $$(aiNow) + " = " + $$(tValue))
