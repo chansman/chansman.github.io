@@ -1,5 +1,5 @@
 {
- "placeholder": true,
+ "placeholder": false,
  "showVmbs": false,
  "treasury": {
   "name": "10-Year U.S. Treasury Note",
@@ -11,10 +11,10 @@
   "issueDate": "2026-05-15",
   "maturity": "2036-05-15",
   "face": 5000,
-  "tradeDate": "2026-09-16",
-  "settleDate": "2026-09-17",
-  "cleanPrice": 95.1875,
-  "accruedPaid": null,
+  "tradeDate": "2026-09-24",
+  "settleDate": "2026-09-25",
+  "cleanPrice": 94.4454,
+  "accruedPaid": 79.06,
   "fees": 0
  },
  "vmbs": {
