@@ -8,9 +8,8 @@
 <link rel="shortcut icon" href="./images/emory.png" type="image/x-icon">
 <style>
     :root {
-        /* sampled from the photo's own backdrop (#DDEAEC averaged), lifted
-           slightly so body text still sits comfortably on it */
-        --paper: #E2ECED;
+        /* plain white; it was #E2ECED, sampled from the photo's backdrop */
+        --paper: #ffffff;
         --ink:   #12181a;          /* near-black, cooled to match the ground */
         /* 4.57:1 on --paper. The previous #6d7a7c measured 3.69:1 and this
            grey carries about half the characters on the page, so it was
@@ -48,9 +47,8 @@
         color: var(--ink);
         background: var(--paper);
         margin: 0;
-        /* top is a little more than the sides, since vertical space reads
-           smaller than horizontal at the same measurement */
-        padding: clamp(32px, 5.5vw, 64px)
+        /* top kept short so the name sits near the top of the window */
+        padding: clamp(24px, 3.5vw, 40px)
                  clamp(20px, 5vw, 60px)
                  clamp(60px, 9vw, 110px);
         /* 840px of content at the 60px side padding. The longest title,
