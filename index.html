@@ -93,8 +93,8 @@
        instead of staying indented under a photo that ended above them. */
     .top { margin-bottom: clamp(28px, 4vw, 40px); }
     .top::after { content: ""; display: block; clear: both; }
-    /* 11.46em wide. The five contact lines plus the facts block come to
-       11.46em × the photo's 503:640 aspect, so its bottom edge lands on the
+    /* 10.23em wide. The four contact lines plus the facts block come to
+       10.23em × the photo's 503:640 aspect, so its bottom edge lands on the
        last line of Education — and because both sides are in em, that
        alignment holds at every font size. Each contact line adds about
        1.23em of width: 9em with three lines, 10.23em with four. */
@@ -102,7 +102,7 @@
         /* holds 9em down to ~525px, then shrinks rather than crowding the
            text beside it into an unreadable column */
         float: left;
-        width: clamp(80px, 24vw, 11.46em);
+        width: clamp(80px, 24vw, 10.23em);
         margin-right: clamp(14px, 4vw, 26px);
         height: auto;
         display: block;
@@ -197,8 +197,7 @@
         <div class="masthead">
             <div class="m">Associate Professor of Economics, Department&nbsp;of&nbsp;Economics</div>
             <div class="m">Associate Professor of Finance (by courtesy), Goizueta&nbsp;Business&nbsp;School</div>
-            <div class="m">Emory&nbsp;University<span class="sep" aria-hidden="true">&middot;</span>332 Rich Memorial&nbsp;Building</div>
-            <div class="m">Atlanta,&nbsp;GA&nbsp;30322</div>
+            <div class="m">Emory&nbsp;University<span class="sep" aria-hidden="true">&middot;</span>332 Rich Memorial&nbsp;Building, Atlanta,&nbsp;GA&nbsp;30322</div>
             <div><a href="mailto:c.hansman@emory.edu">c.hansman@emory.edu</a><span class="sep" aria-hidden="true">&middot;</span><a href="./Hansman_cv_Sept2026.pdf">cv</a></div>
         </div>
         <div class="facts">
