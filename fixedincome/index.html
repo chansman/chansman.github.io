@@ -450,7 +450,7 @@ Gain or loss  = worth if sold + distributions received − paid</div>
         "We locked that rate in, provided we hold to " + fmtDate(t.maturity) + "."
       ) + item2(
         "10-year Treasury yield today — " + tenNow,
-        "Treasury fits a par yield curve to trading in its most recently issued securities and publishes it daily. The 10-year point is the coupon a ten-year security would need in order to sell for exactly $100 today. Our note and that number track each other very closely" + (gapBp == null ? ", " : " \u2014 today they sit " + gapBp.toFixed(1) + " basis points apart \u2014 ") + "since both are claims on the same government over nearly the same horizon. Our note matures in " + yearsLeft(tLast.date) + " years rather than ten, it trades at a discount so more of its value sits in the " + D(t.maturity).getUTCFullYear() + " repayment than a par bond's would, and Treasury auctioned it in " + D(t.auctionDate).toLocaleDateString("en-US", {month: "long", timeZone: "UTC"}) + ", so the curve is no longer fitted to it. The yield chart's dotted line marks where the 10-year sat on the day we bought, " + (function () { const b = [...((px.rates && px.rates.tenYear) || [])].reverse().find((r) => r.date <= t.tradeDate); return b ? pct(b.rate / 100) : "–"; })() + "."
+        "Treasury fits a par yield curve to trading in its most recently issued securities and publishes it daily. The 10-year point is the coupon a ten-year security would need in order to sell for exactly $100 today. Our note and that number track each other very closely" + (gapBp == null ? ", " : " \u2014 today they sit " + gapBp.toFixed(1) + " basis points apart \u2014 ") + "since both are claims on the same government over nearly the same horizon. Our note matures in " + yearsLeft(tLast.date) + " years rather than ten, it trades at a discount so more of its value sits in the " + D(t.maturity).getUTCFullYear() + " repayment than a par bond's would, and Treasury auctioned it in " + D(t.auctionDate).toLocaleDateString("en-US", {month: "long", timeZone: "UTC"}) + ", so the curve is no longer fitted to it. The yield chart's dashed line marks our own yield to maturity when we bought, " + pct(y0) + "."
       ) + item2(
         "Current yield — " + pct(t.coupon / tLast.eod),
         "The coupon measured against today's price. It counts the cash a holder collects each year and ignores the " + (tLast.eod < 100 ? "gain" : "loss") + " waiting at maturity, when a note bought at " + f(tLast.eod, 4) + " is repaid at 100, which is why it sits " + (tLast.eod < 100 ? "below" : "above") + " the yield to maturity.",
@@ -550,7 +550,8 @@ Gain or loss  = worth if sold + distributions received − paid</div>
     const markers = isT && t.auctionDate ? [{date: t.auctionDate, label: "auctioned"}] : [];
     const buyDate = isT ? t.tradeDate : m.tradeDate, buyPrice = isT ? t.cleanPrice : m.price;
     const allDates = [...new Set([...pricePts, ...ratePts].map((p) => p.date))].sort();
-    const buyRate = [...ratePts].reverse().find((p) => p.date <= buyDate);
+    // For the note, mark the yield to maturity at our actual fill, not the 10-year's close that day.
+    const buyRate = isT ? {v: ytm(t, t.cleanPrice, D(t.settleDate))} : [...ratePts].reverse().find((p) => p.date <= buyDate);
     const muted = (x) => `<span style="color:var(--muted)">${x}</span>`;
     const priceChart = drawChart({
       key: isT ? "t" : "m", pts: pricePts, color: isT ? "--tsy" : "--mbs", dates: allDates, buyDate,
