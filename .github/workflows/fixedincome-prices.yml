@@ -2,8 +2,9 @@ name: Update fixed income prices
 
 on:
   schedule:
-    # 22:30 UTC on weekdays = 6:30pm EDT / 5:30pm EST, after the market close
-    - cron: "30 22 * * 1-5"
+    # 03:00 UTC Tue-Sat = 11pm EDT / 10pm EST Mon-Fri. FedInvest posts its
+    # end-of-day prices late in the evening, and an earlier run often missed them.
+    - cron: "0 3 * * 2-6"
   workflow_dispatch:
 
 permissions:
