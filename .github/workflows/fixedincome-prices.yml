@@ -2,9 +2,11 @@ name: Update fixed income prices
 
 on:
   schedule:
-    # 03:00 UTC Tue-Sat = 11pm EDT / 10pm EST Mon-Fri. FedInvest posts its
-    # end-of-day prices late in the evening, and an earlier run often missed them.
-    - cron: "0 3 * * 2-6"
+    # 03:00 UTC = 11pm EDT / 10pm EST, after FedInvest usually posts its close.
+    # 13:00 UTC = 9am EDT / 8am EST, to catch a close the overnight run missed.
+    # Both run every day, so a missed Friday close is picked up on Saturday
+    # instead of Monday night. The script commits only when it finds new data.
+    - cron: "0 3,13 * * *"
   workflow_dispatch:
 
 permissions:
