@@ -2,11 +2,12 @@ name: Update fixed income prices
 
 on:
   schedule:
-    # 03:00 UTC = 11pm EDT / 10pm EST, after FedInvest usually posts its close.
-    # 13:00 UTC = 9am EDT / 8am EST, to catch a close the overnight run missed.
-    # Both run every day, so a missed Friday close is picked up on Saturday
-    # instead of Monday night. The script commits only when it finds new data.
-    - cron: "0 3,13 * * *"
+    # FedInvest posts a day's end-of-day price the next business morning, so
+    # run hourly from 13:23 to 16:23 UTC (9:23am-12:23pm EDT, 8:23-11:23am EST)
+    # to pick it up soon after it appears. GitHub often starts scheduled runs
+    # hours late, and an odd minute avoids the top-of-hour queue. The script
+    # commits only when it finds new data.
+    - cron: "23 13-16 * * *"
   workflow_dispatch:
 
 permissions:
